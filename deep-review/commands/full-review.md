@@ -1,5 +1,389 @@
 ---
 name: full-review
-description: Orchestrates a multi-agent, exhaustive code review of the entire repository across three phases — Discovery, Review, and Synthesis.
+description: "Orchestrates a multi-agent, exhaustive code review of the entire repository across three phases: Discovery, Review, and Synthesis."
 ---
-<!-- TODO: Full command orchestration will be implemented in Track 05 (Orchestrator Command) -->
+
+# Deep Review: Full Review
+
+You are the orchestrator for a deep, multi-agent code review. You coordinate three phases:
+1. **Discovery** — Map the repo, generate documentation, create a batch plan
+2. **Review** — Launch 5 specialized agents in parallel per batch
+3. **Synthesis** — Deduplicate findings, cross-cut analysis, produce final report
+
+**CRITICAL RULES:**
+- You NEVER read source code files directly — only batch plans, progress files, and output existence checks
+- All heavy work happens in sub-agents with fresh context windows
+- Disk (`.deep-review/` directory) is the coordination layer between phases
+- Write state to disk before every batch — this makes the review resumable after compaction
+
+---
+
+## Setup
+
+### Step 1: Initialize
+
+```bash
+mkdir -p .deep-review
+```
+
+Add `.deep-review/` to `.gitignore` if not already present:
+
+```bash
+grep -q '.deep-review/' .gitignore 2>/dev/null || echo '.deep-review/' >> .gitignore
+```
+
+### Step 2: Record start time
+
+Write initial state:
+
+```json
+{
+  "phase": "setup",
+  "started_at": "{ISO timestamp}",
+  "phase_times": {},
+  "batches_total": 0,
+  "batches_completed": 0,
+  "findings": {"critical": 0, "high": 0, "medium": 0, "low": 0},
+  "agent_failures": [],
+  "false_positives_removed": 0
+}
+```
+
+Write this to `.deep-review/state.json`.
+
+### Step 3: Set effort level
+
+Run `/effort max` to ensure maximum reasoning depth for all sub-agents.
+
+---
+
+## Phase 1: Discovery
+
+### Step 4: Launch discovery agent
+
+Update `state.json`: set `"phase": "discovery"`.
+
+Launch the discovery agent using the **Task tool** in FOREGROUND (blocking):
+
+**Prompt for the discovery agent:**
+> You are the discovery agent for a deep code review. Your job is to map the entire repository, understand every module, create AGENTS.md documentation files, and produce a batch plan for the review phase.
+>
+> Follow the instructions in your agent definition file (`agents/discovery.md`) exactly. Complete all 5 steps:
+> 1. Map the repository (file inventory, stats, metadata)
+> 2. Understand every module (read files, analyze each directory)
+> 3. Generate AGENTS.md files (with companion CLAUDE.md) for directories with 3+ code files
+> 4. Write the discovery profile to `.deep-review/discovery.md`
+> 5. Generate the batch plan to `.deep-review/batch-plan.md`
+>
+> Run your self-review checklist before completing.
+
+**Agent configuration:**
+- `subagent_type`: Use the discovery agent
+- Do NOT run in background — wait for completion
+
+### Step 5: Read discovery results
+
+After the discovery agent completes:
+
+1. Verify `.deep-review/discovery.md` exists
+2. Verify `.deep-review/batch-plan.md` exists
+3. Read `.deep-review/batch-plan.md` to determine:
+   - Total number of batches
+   - Files per batch
+   - Total files to review
+4. Read `.deep-review/discovery.md` for repo stats (total files, modules, AGENTS.md count)
+
+Update `state.json`:
+- `"phase": "review"`
+- `"batches_total": {N}`
+- `"phase_times": {"discovery": "{elapsed}"}`
+
+Print:
+```
+Phase 1 complete. Discovered {N} files across {M} modules.
+Created {X} AGENTS.md files. Generated {B} review batches.
+Discovery took {time}.
+```
+
+---
+
+## Phase 2: Review
+
+### Step 6: Process batches sequentially
+
+For each batch in the batch plan (highest risk first):
+
+#### 6a. Create batch directory
+
+```bash
+mkdir -p .deep-review/batch-{N}
+```
+
+#### 6b. Write state before launching agents
+
+Update `state.json`:
+- `"current_batch": {N}`
+- Save all current progress
+
+Write `.deep-review/progress.md`:
+```markdown
+# Review Progress
+
+## Status
+- Phase: Review
+- Current batch: {N} of {total}
+- Batches completed: {list}
+
+## Findings So Far
+- 🔴 Critical: {N}
+- 🟠 High: {N}
+- 🟡 Medium: {N}
+- 🔵 Low: {N}
+
+## Agent Failures
+{list any failures, or "None"}
+```
+
+**This state write is critical — it enables recovery after compaction.**
+
+#### 6c. Launch 5 review agents in PARALLEL (background)
+
+For each of the 5 review agents (bug-hunter, security-auditor, error-inspector, performance-detector, stack-reviewer), launch a Task with `run_in_background: true`:
+
+**Prompt template for each review agent:**
+> You are the {agent-name} agent for a deep code review.
+>
+> **Your assignment — Batch {N}: {batch descriptive name}**
+>
+> Review these directories:
+> {list of directories from batch plan}
+>
+> **Instructions:**
+> 1. Read the AGENTS.md file in each assigned directory FIRST for module context
+> 2. Read the FULL contents of EVERY file in your assigned directories — no skimming
+> 3. Check every item in your agent checklist (from your agent definition)
+> 4. Write your findings to `.deep-review/batch-{N}/{agent-output-file}.md`
+>
+> **Output file:** `.deep-review/batch-{N}/{output-name}.md`
+>
+> **Finding format (STRICT):**
+> ```
+> ## {SEVERITY_EMOJI} {SEVERITY}: {short description}
+> **File:** `{exact/file/path.ext}`
+> **Line(s):** {line number or range}
+> **Category:** {category}
+> **Confidence:** {High|Medium|Low}
+> **Description:** {what's wrong}
+> **Impact:** {what breaks}
+> **Fix:** {specific fix}
+> ```
+>
+> **Severity scale:**
+> - 🔴 CRITICAL: Crashes, data loss, security breaches in production
+> - 🟠 HIGH: Bugs under common conditions
+> - 🟡 MEDIUM: Edge case issues
+> - 🔵 LOW: Could lead to future bugs
+>
+> **Confidence rules:**
+> - High: Exact code path shown
+> - Medium: Pattern suggests issue, can't fully trace
+> - Low: Heuristic/inferred
+>
+> **Mandatory rules:**
+> - Read FULL contents of every file
+> - Do NOT say "looks fine" or skip files
+> - Every finding needs exact file path and line number
+> - Re-read 100+ line files with zero findings
+> - Report undocumented gotchas as "Documentation Gap" findings
+>
+> Start your output with a header:
+> ```
+> # {Agent Name} — Batch {N} Findings
+> **Files reviewed:** {count}
+> **Total findings:** {count}
+> **By severity:** 🔴 {n} | 🟠 {n} | 🟡 {n} | 🔵 {n}
+> ```
+>
+> Run your self-review checklist before completing.
+
+**Agent-to-output mapping:**
+| Agent | Output File |
+|-------|------------|
+| bug-hunter | `bugs.md` |
+| security-auditor | `security.md` |
+| error-inspector | `errors.md` |
+| performance-detector | `performance.md` |
+| stack-reviewer | `stack.md` |
+
+#### 6d. Poll for completion
+
+After launching all 5 agents, poll for output files:
+
+```bash
+ls .deep-review/batch-{N}/bugs.md .deep-review/batch-{N}/security.md .deep-review/batch-{N}/errors.md .deep-review/batch-{N}/performance.md .deep-review/batch-{N}/stack.md 2>/dev/null | wc -l
+```
+
+Wait until all 5 files exist or a reasonable timeout is reached.
+
+#### 6e. Handle agent failures
+
+If an agent's output file is missing after timeout:
+1. Log the failure to `state.json` under `"agent_failures"`
+2. Log to `progress.md`
+3. Optionally retry ONCE with a refined prompt (add: "Previous attempt may have failed. Ensure you write output to the specified file path.")
+4. If still missing after retry, note the gap and continue
+
+**Do NOT block the entire review on a single agent failure.**
+
+#### 6f. Count findings and update progress
+
+For each completed output file, count findings by severity:
+
+```bash
+grep -c '🔴 CRITICAL' .deep-review/batch-{N}/bugs.md 2>/dev/null || echo 0
+grep -c '🟠 HIGH' .deep-review/batch-{N}/bugs.md 2>/dev/null || echo 0
+# ... for each file and severity
+```
+
+Update `state.json` and `progress.md` with running totals.
+
+Print:
+```
+Batch {N}/{total} complete. Found {X} issues so far.
+  🔴 {n} | 🟠 {n} | 🟡 {n} | 🔵 {n}
+```
+
+#### 6g. Batch sizing strategy
+
+The discovery agent creates the batch plan, but the orchestrator adapts its processing strategy based on repo size:
+
+| Repo Size | Files | Parallel Batches | Compaction Strategy |
+|-----------|-------|-----------------|---------------------|
+| Small | < 50 | All at once | None needed |
+| Medium | 50-200 | 1 batch at a time | Auto-compaction handles it |
+| Large | 200-500 | 1 batch at a time | Write state before each batch |
+| Huge | 500+ | 1 batch at a time | Write state before each batch; expect auto-compaction between batches |
+
+### Step 7: Phase 2 summary
+
+After all batches complete:
+
+Update `state.json`:
+- `"phase": "synthesis"`
+- `"phase_times": {..., "review": "{elapsed}"}`
+
+Print:
+```
+Phase 2 complete. {total findings} issues found across {B} batches.
+Review took {time}. {failures} agent failure(s).
+```
+
+---
+
+## Phase 3: Synthesis
+
+### Step 8: Launch synthesizer agent
+
+Launch the synthesizer agent using the **Task tool** in FOREGROUND (blocking):
+
+**Prompt for the synthesizer agent:**
+> You are the synthesizer for a deep code review. Your job is to read all findings, deduplicate them, spot-check top issues, perform cross-cutting analysis, and produce the final report.
+>
+> Follow the instructions in your agent definition file (`agents/synthesizer.md`) exactly. Complete all 5 steps:
+> 1. Read ALL findings from ALL `.deep-review/batch-*/` directories
+> 2. Apply three-level deduplication (exact match, semantic overlap, systemic patterns)
+> 3. Spot-check top 10 Critical/High findings by re-reading actual code
+> 4. Perform all 4 cross-cutting analyses (architecture, dependencies, testing gaps, secrets)
+> 5. Update root AGENTS.md and write REVIEW_REPORT.md to the repo root
+>
+> **Important:**
+> - Elevate confidence for multi-agent consensus — do NOT change severity
+> - Include ALL findings (no cap per severity level)
+> - Update root AGENTS.md only (not subdirectory files)
+>
+> Run your self-review checklist before completing.
+
+### Step 9: Verify synthesis output
+
+After the synthesizer completes:
+
+1. Verify `REVIEW_REPORT.md` exists in the repo root
+2. If missing, retry synthesizer once
+3. Read the statistics section of REVIEW_REPORT.md for final counts
+
+Update `state.json`:
+- `"phase": "complete"`
+- `"phase_times": {..., "synthesis": "{elapsed}"}`
+
+Print:
+```
+Phase 3 complete. REVIEW_REPORT.md generated. Synthesis took {time}.
+```
+
+---
+
+## Final Summary
+
+### Step 10: Print completion summary
+
+Read final statistics from `state.json` and REVIEW_REPORT.md. Print:
+
+```
+═══════════════════════════════════════════
+  DEEP REVIEW COMPLETE
+═══════════════════════════════════════════
+
+  Duration:       {total time}
+    Discovery:    {phase 1 time}
+    Review:       {phase 2 time}
+    Synthesis:    {phase 3 time}
+
+  Files reviewed: {count}
+  Modules documented: {count} AGENTS.md files
+
+  Findings:
+    🔴 Critical:  {N}
+    🟠 High:      {N}
+    🟡 Medium:    {N}
+    🔵 Low:       {N}
+
+  Reports:
+    → REVIEW_REPORT.md    (full findings)
+    → AGENTS.md files     (persistent documentation)
+
+  Next steps:
+    1. Read REVIEW_REPORT.md for prioritized findings
+    2. Fix 🔴 Critical issues first
+    3. Run /deep-review:maintain-docs after making changes
+═══════════════════════════════════════════
+```
+
+---
+
+## Compaction Recovery
+
+If context compaction occurs at any point during the review:
+
+1. **Read state:** `cat .deep-review/state.json`
+2. **Read progress:** `cat .deep-review/progress.md`
+3. **Read batch plan:** `cat .deep-review/batch-plan.md`
+4. **Resume from where you left off:**
+   - If `phase` is "discovery": Discovery agent is running or failed — check for output files and proceed to Phase 2 if they exist
+   - If `phase` is "review": Check `batches_completed` and `current_batch` — skip completed batches, resume from current
+   - If `phase` is "synthesis": Synthesizer is running or failed — check for REVIEW_REPORT.md
+   - If `phase` is "complete": Print the final summary
+
+**This recovery logic is the reason we write state to disk before every batch.** Auto-compaction can happen at any time — the review must be resilient to it.
+
+---
+
+## Error Handling Summary
+
+| Error | Action |
+|-------|--------|
+| Discovery agent fails | Abort review — cannot proceed without batch plan |
+| Review agent output missing | Log failure, retry once, continue if still missing |
+| All 5 agents fail for a batch | Log as failed batch, continue to next batch |
+| Synthesizer fails | Retry once. If still fails, point user to raw findings in `.deep-review/batch-*/` |
+| REVIEW_REPORT.md missing | Retry synthesizer. If still missing, create a minimal report listing raw finding file paths |
+| Context compaction | Re-read state.json + progress.md + batch-plan.md, resume |

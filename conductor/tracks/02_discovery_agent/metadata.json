@@ -1,6 +1,6 @@
 {
   "track_id": "02_discovery_agent",
-  "state": "IN_PROGRESS",
+  "state": "COMPLETE",
   "complexity": "M",
   "wave": 2,
 
@@ -18,5 +18,5 @@
 
   "created_at": "2026-02-07T23:30:00Z",
   "started_at": "2026-02-08T00:10:00Z",
-  "completed_at": null
+  "completed_at": "2026-02-08T00:15:00Z"
 }

@@ -1,0 +1,22 @@
+{
+  "track_id": "04_synthesizer_agent",
+  "state": "NOT_STARTED",
+  "complexity": "M",
+  "wave": 2,
+
+  "cc_version_at_brief": "v1",
+  "cc_version_current": "v1",
+
+  "dependencies": ["01_plugin_scaffold"],
+  "interfaces_owned": ["REVIEW_REPORT.md", "root-AGENTS.md-update"],
+  "interfaces_consumed": ["batch-findings-format", "discovery.md"],
+
+  "events_published": [],
+  "events_consumed": [],
+
+  "patches": [],
+
+  "created_at": "2026-02-07T23:30:00Z",
+  "started_at": null,
+  "completed_at": null
+}

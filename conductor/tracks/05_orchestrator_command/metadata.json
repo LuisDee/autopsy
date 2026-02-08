@@ -1,0 +1,22 @@
+{
+  "track_id": "05_orchestrator_command",
+  "state": "NOT_STARTED",
+  "complexity": "XL",
+  "wave": 3,
+
+  "cc_version_at_brief": "v1",
+  "cc_version_current": "v1",
+
+  "dependencies": ["02_discovery_agent", "03_review_agents", "04_synthesizer_agent"],
+  "interfaces_owned": ["state.json", "progress.md", "deep-review-directory", "final-summary"],
+  "interfaces_consumed": ["batch-plan.md", "discovery.md", "batch-findings-format", "REVIEW_REPORT.md"],
+
+  "events_published": [],
+  "events_consumed": [],
+
+  "patches": [],
+
+  "created_at": "2026-02-07T23:30:00Z",
+  "started_at": null,
+  "completed_at": null
+}

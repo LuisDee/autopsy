@@ -1,0 +1,55 @@
+# Product Guidelines
+
+## Output Tone & Style
+- Direct and technical. No filler, no preamble.
+- Facts, file paths, line numbers, severity, fix. That's it.
+- Use code blocks for file references and fix suggestions.
+- Never use vague language ("consider", "might want to", "could potentially").
+
+## Report Organization
+- Primary sort: severity (Critical → High → Medium → Low)
+- Secondary sort: category within each severity level (Bugs, Security, Error Handling, Performance, Stack-Specific)
+- Cross-cutting findings (architecture, dependencies, testing gaps) in a dedicated section after severity-sorted issues.
+
+## Finding Format
+Every finding must include ALL of the following:
+- Severity indicator (Critical/High/Medium/Low)
+- Confidence score (High/Medium/Low) — how certain the agent is this is a real issue
+- Exact file path
+- Line number or range
+- Category
+- One-line description
+- Impact statement
+- Specific fix recommendation with code
+
+## AGENTS.md Documentation Standards
+- Generate `AGENTS.md` files (cross-LLM compatible) as primary documentation
+- Generate companion `CLAUDE.md` files containing `@AGENTS.md` for Claude Code compatibility
+- Specificity over completeness: every statement must reference actual code, actual files, actual behavior
+- "TODO: investigate" is better than a generic guess
+- Root AGENTS.md: under 80 lines, acts as a router to subdirectory files
+- Subdirectory AGENTS.md: under 60 lines, focused on local context only
+- No file trees (they go stale immediately)
+- No duplication of root-level info in subdirectories
+- Three-tier boundary system: Always do / Ask first / Never do
+- Include executable commands in backtick code blocks
+
+## Existing Documentation Handling
+- Preserve and augment: read existing content, keep what's there, add new sections
+- Never delete information unless provably wrong
+- Append rather than replace
+- Mark uncertainties with "TODO: verify" rather than guessing
+
+## Quality Bar for Findings
+- Each finding must save a developer time — no generic advice
+- Require evidence (exact code snippets) for Critical and High severity
+- Multiple agents flagging the same issue elevates confidence, not severity
+- Signal ratio target: >60% of findings should be actionable (Tier 1 or Tier 2)
+- Zero findings in a 100+ line file triggers a re-review instruction
+
+## Quality Bar for AGENTS.md Files
+- Must contain information that saves 30+ minutes of code reading
+- Must be specific to THIS code, not generic boilerplate
+- File tables must list actual files with actual descriptions
+- Data flow must describe actual data transformations
+- Gotchas must describe actual non-obvious things

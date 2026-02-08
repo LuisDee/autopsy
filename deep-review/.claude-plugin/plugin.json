@@ -9,7 +9,10 @@
     "./agents/error-inspector.md",
     "./agents/performance-detector.md",
     "./agents/stack-reviewer.md",
-    "./agents/synthesizer.md"
+    "./agents/synthesizer.md",
+    "./agents/architect.md",
+    "./agents/researcher.md",
+    "./agents/architecture-synthesizer.md"
   ],
   "skills": [
     "./skills/codebase-documentation"

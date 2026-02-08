@@ -2,7 +2,7 @@
 
 ## What It Does
 
-A Claude Code plugin that performs exhaustive, multi-agent code review of your entire repository with a single command. You run `/deep-review:full-review` and walk away. When it finishes, you have a prioritized `REVIEW_REPORT.md` with every bug, security vulnerability, error handling gap, and performance issue found — plus `AGENTS.md` files in every significant directory that make all future Claude Code sessions faster and more context-aware.
+A Claude Code plugin that performs exhaustive, multi-agent code review and architecture assessment of your entire repository with a single command. You run `/deep-review:full-review` and walk away. When it finishes, you have two complementary reports: `REVIEW_REPORT.md` with every bug, security vulnerability, error handling gap, and performance issue found, and `ARCHITECTURE_REPORT.md` with a design-level assessment of your system's components, tooling choices, quality attributes, and improvement recommendations — plus `AGENTS.md` files in every significant directory that make all future Claude Code sessions faster and more context-aware.
 
 ## Installation
 
@@ -20,9 +20,9 @@ claude --plugin-dir ./deep-review
 
 ### `/deep-review:full-review`
 
-Launches the full 3-phase autonomous review pipeline. Discovers your repo structure, dispatches 5 specialized review agents in parallel across file batches, then synthesizes all findings into a single deduplicated report.
+Launches the full autonomous review pipeline. Discovers your repo structure, dispatches 5 specialized code review agents in parallel across file batches while simultaneously running architecture assessment agents (architect + researcher), then synthesizes all findings into two complementary reports.
 
-**Output:** `REVIEW_REPORT.md` in your repo root, `AGENTS.md` files throughout the codebase, companion `CLAUDE.md` files with `@AGENTS.md` references.
+**Output:** `REVIEW_REPORT.md` (code-level findings) and `ARCHITECTURE_REPORT.md` (design-level assessment) in your repo root, `AGENTS.md` files throughout the codebase, companion `CLAUDE.md` files with `@AGENTS.md` references.
 
 **Usage:**
 ```
@@ -44,7 +44,8 @@ Detects which files changed since the last review (via `git diff`) and increment
 
 | File | Location | Purpose |
 |------|----------|---------|
-| `REVIEW_REPORT.md` | Repo root | Severity-graded findings with file paths, line numbers, and fix recommendations |
+| `REVIEW_REPORT.md` | Repo root | Code-level findings: bugs, security issues, error handling gaps, performance problems |
+| `ARCHITECTURE_REPORT.md` | Repo root | Design-level assessment: components, tooling, quality attributes, recommendations |
 | `AGENTS.md` | Every significant directory | Persistent documentation: module purpose, key files, boundaries, gotchas |
 | `CLAUDE.md` | Alongside each `AGENTS.md` | Companion file with `@AGENTS.md` reference for Claude Code compatibility |
 | `.deep-review/` | Repo root | Working directory with discovery data, batch results, and progress state (can be gitignored) |
@@ -62,25 +63,41 @@ The plugin uses a 3-phase orchestrator-worker architecture. The orchestrator com
   │      produces batch plan for review agents
   │      Writes: .deep-review/discovery.md, batch-plan.md
   │
-  │  PHASE 2: REVIEW (per batch, 5 agents in parallel)
+  │  PHASE 2: REVIEW + ARCHITECTURE (parallel)
+  │
+  │  Phase 2B — Code Review (per batch, 5 agents in parallel)
   ├──► bug-hunter ──────────► .deep-review/batch-N/bugs.md
   ├──► security-auditor ────► .deep-review/batch-N/security.md
   ├──► error-inspector ─────► .deep-review/batch-N/errors.md
   ├──► performance-detector ► .deep-review/batch-N/performance.md
   ├──► stack-reviewer ──────► .deep-review/batch-N/stack.md
   │
-  │  PHASE 3: SYNTHESIS
-  └──► synthesizer agent
-         Reads all batch results, deduplicates,
-         performs cross-cutting analysis,
-         writes REVIEW_REPORT.md
+  │  Phase 2A — Architecture (runs alongside first batch)
+  ├──► architect ───────────► .deep-review/architecture-analysis.md
+  ├──► researcher ──────────► .deep-review/best-practices-research.md
+  │
+  │  PHASE 3: SYNTHESIS (both in parallel)
+  ├──► synthesizer ─────────► REVIEW_REPORT.md
+  └──► arch-synthesizer ────► ARCHITECTURE_REPORT.md
 ```
 
 **Key design principles:**
 - Sub-agents cannot spawn other sub-agents — the orchestrator chains all agents
-- Each agent reads every file in its assigned batch completely (no sampling)
+- Each review agent reads every file in its assigned batch completely (no sampling)
+- Architecture agents (architect + researcher) run alongside the first code review batch for maximum parallelism
+- Architecture assessment failure never blocks the code review pipeline
 - Disk-based coordination keeps the orchestrator context light
 - Progress is tracked in `.deep-review/state.json` and `.deep-review/progress.md` for compaction safety
+
+## Two Complementary Reports
+
+A full review produces two reports that cover different levels of analysis:
+
+**REVIEW_REPORT.md** — Code-level findings. Bugs, security vulnerabilities, error handling gaps, performance issues. Each finding has an exact file path, line number, severity, and fix recommendation. This is what you fix first.
+
+**ARCHITECTURE_REPORT.md** — Design-level assessment. Component decomposition, interaction analysis, tooling evaluations, quality attribute tradeoffs, and design gap identification. Based on ATAM (Architecture Tradeoff Analysis Method) adapted for automated analysis, cross-referenced with best-practices research from official documentation. This is what you use for strategic technical decisions.
+
+The reports may cross-reference each other (e.g., architecture recommendations citing code-level evidence) but do not duplicate findings.
 
 ## Recommended Configuration
 
@@ -105,12 +122,12 @@ Approximate costs based on repository size (Claude Sonnet-class pricing):
 
 | Repo Size | Files | Batches | Agents Spawned | Estimated Time | Estimated Cost |
 |-----------|-------|---------|----------------|----------------|----------------|
-| **Small** | < 50 | 1 | 7 | 10-20 min | $2-5 |
-| **Medium** | 50-200 | 2-3 | 12-17 | 30-60 min | $5-15 |
-| **Large** | 200-500 | 4-8 | 22-42 | 1-3 hours | $15-40 |
-| **Huge** | 500+ | 8+ | 42+ | 3+ hours | $40+ |
+| **Small** | < 50 | 1 | 10 | 10-20 min | $3-7 |
+| **Medium** | 50-200 | 2-3 | 15-20 | 30-60 min | $7-18 |
+| **Large** | 200-500 | 4-8 | 25-45 | 1-3 hours | $18-45 |
+| **Huge** | 500+ | 8+ | 45+ | 3+ hours | $45+ |
 
-Costs scale linearly with file count. Each review batch spawns 5 parallel agents. The discovery and synthesis phases add a fixed overhead of 2 agents per run.
+Costs scale linearly with file count. Each review batch spawns 5 parallel agents. Fixed overhead per run: discovery (1) + architect (1) + researcher (1) + code review synthesizer (1) + architecture synthesizer (1) = 5 agents.
 
 ## Companion Plugin Recommendations
 

@@ -23,7 +23,7 @@
 
 ## Phase 2: full-review.md Terminal Output Overhaul
 
-- [ ] Task 2.1: Replace phase transition output in full-review.md
+- [x] Task 2.1: Replace phase transition output in full-review.md
   - [ ] Add reference instruction to output rendering guide at top of file
   - [ ] Replace Step 3 output (setup) — remove any filler, use dense format
   - [ ] Replace Step 5 output (discovery complete) — collapsed discovery line with ✓
@@ -32,7 +32,7 @@
   - [ ] Replace Step 7 output (review complete) — collapsed review line
   - [ ] Replace Step 8 output (synthesis start) — collapsed phases + active synthesis line
 
-- [ ] Task 2.2: Replace final summary output in full-review.md (Step 10)
+- [x] Task 2.2: Replace final summary output in full-review.md (Step 10)
   - [ ] Remove double-line box (═══) entirely
   - [ ] Replace with: three collapsed ✓ lines + thin divider + "Deep Review Complete — {time} total"
   - [ ] Add severity counts line: `{N} critical · {N} high · {N} medium · {N} low     {total} issues`
@@ -41,25 +41,25 @@
   - [ ] Remove duration breakdown section (already in collapsed lines)
   - [ ] Remove post-completion prose paragraph
 
-- [ ] Task 2.3: Add critical-only terminal display logic (FR-5)
+- [x] Task 2.3: Add critical-only terminal display logic (FR-5)
   - [ ] Add instruction to read REVIEW_REPORT.md Critical Issues section after synthesis
   - [ ] Add `── Critical ──` section header (thin divider)
   - [ ] Display each critical issue in 3-line format: number + title, impact, → file paths
   - [ ] Add DD-4 fallback: if zero criticals, show top 3 high issues under `── High ──`
   - [ ] Add fallback: if zero criticals AND zero high, print "No critical or high issues found."
 
-- [ ] Task 2.4: Replace next steps and reports sections
+- [x] Task 2.4: Replace next steps and reports sections
   - [ ] Replace next steps with numbered, imperative format (no "Consider" or "You should")
   - [ ] Replace reports section with → arrows + filename + size/count
   - [ ] Remove any remaining filler text or narration
 
-- [ ] Task 2.5: Update progress.md template (FR-4)
+- [x] Task 2.5: Update progress.md template (FR-4)
   - [ ] Replace progress.md template in Step 6b with v2 dense format
   - [ ] Add `<!-- progress v2 -->` version marker
   - [ ] Use key-value format: phase, batch, completed, severity counts, failures
   - [ ] Remove emoji from progress.md template (🔴🟠🟡🔵)
 
-- [ ] Task 2.6: Update compaction recovery for dual-format progress.md
+- [x] Task 2.6: Update compaction recovery for dual-format progress.md
   - [ ] Add version marker detection to Compaction Recovery section
   - [ ] Add parsing logic for v2 format (key-value)
   - [ ] Preserve existing v1 parsing logic (Markdown with emoji)

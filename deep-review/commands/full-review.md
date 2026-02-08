@@ -14,6 +14,7 @@ You are the orchestrator for a deep, multi-agent code review. You coordinate thr
 - All heavy work happens in sub-agents with fresh context windows
 - Disk (`.deep-review/` directory) is the coordination layer between phases
 - Write state to disk before every batch — this makes the review resumable after compaction
+- Follow the output rendering guide at `references/output-rendering.md` for ALL terminal output formatting. Use the exact symbols, colors, and patterns defined there. Never use banned patterns.
 
 ---
 
@@ -62,6 +63,13 @@ Run `/effort max` to ensure maximum reasoning depth for all sub-agents.
 
 Update `state.json`: set `"phase": "discovery"`.
 
+Print (State 1 — Discovery active):
+```
+  ⠹ Discovery · scanning repository...
+  ◇ Review
+  ◇ Synthesis
+```
+
 Launch the discovery agent using the **Task tool** in FOREGROUND (blocking):
 
 **Prompt for the discovery agent:**
@@ -97,11 +105,9 @@ Update `state.json`:
 - `"batches_total": {N}`
 - `"phase_times": {"discovery": "{elapsed}"}`
 
-Print:
+Print (collapsed Discovery line — green ✓):
 ```
-Phase 1 complete. Discovered {N} files across {M} modules.
-Created {X} AGENTS.md files. Generated {B} review batches.
-Discovery took {time}.
+  ✓ Discovery · {N} files across {M} modules · {time}
 ```
 
 ### Step 5a: Gather recent changes context
@@ -120,7 +126,18 @@ This file will be passed to review agents so they don't flag intentional recent 
 
 ### Step 6: Process batches sequentially
 
-For each batch in the batch plan (highest risk first):
+For each batch in the batch plan (highest risk first).
+
+Print (State 2 — Review active):
+```
+  ✓ Discovery · {N} files across {M} modules · {time}
+  ──────────────────────────────────────────────────
+  ⠹ Review · batch {N}/{total} · {files} files, ~{LOC} LOC
+
+  ◇ Next: synthesize → REVIEW_REPORT.md
+```
+
+For each batch:
 
 #### 6a. Create batch directory
 
@@ -134,23 +151,14 @@ Update `state.json`:
 - `"current_batch": {N}`
 - Save all current progress
 
-Write `.deep-review/progress.md`:
-```markdown
-# Review Progress
-
-## Status
-- Phase: Review
-- Current batch: {N} of {total}
-- Batches completed: {list}
-
-## Findings So Far
-- 🔴 Critical: {N}
-- 🟠 High: {N}
-- 🟡 Medium: {N}
-- 🔵 Low: {N}
-
-## Agent Failures
-{list any failures, or "None"}
+Write `.deep-review/progress.md` (v2 dense format):
+```
+<!-- progress v2 -->
+phase: review
+batch: {N}/{total}
+completed: {comma-separated list of completed batch numbers}
+critical: {N} | high: {N} | medium: {N} | low: {N}
+failures: {comma-separated list or "none"}
 ```
 
 **This state write is critical — it enables recovery after compaction.**
@@ -252,11 +260,12 @@ grep -c '🟠 HIGH' .deep-review/batch-{N}/bugs.md 2>/dev/null || echo 0
 
 Update `state.json` and `progress.md` with running totals.
 
-Print:
+Print agent completion status (one line, ✓ for success, ✗ in red for failure):
 ```
-Batch {N}/{total} complete. Found {X} issues so far.
-  🔴 {n} | 🟠 {n} | 🟡 {n} | 🔵 {n}
+  ✓ Bug Hunter · ✓ Security · ✓ Error Handling · ✓ Performance · ✗ Stack Review
 ```
+
+Then update the batch counter in the review status line.
 
 #### 6f. Batch sizing strategy
 
@@ -277,10 +286,9 @@ Update `state.json`:
 - `"phase": "synthesis"`
 - `"phase_times": {..., "review": "{elapsed}"}`
 
-Print:
+Print (collapsed Review line — green ✓):
 ```
-Phase 2 complete. {total findings} issues found across {B} batches.
-Review took {time}. {failures} agent failure(s).
+  ✓ Review · 5 agents · {time}
 ```
 
 ---
@@ -288,6 +296,14 @@ Review took {time}. {failures} agent failure(s).
 ## Phase 3: Synthesis
 
 ### Step 8: Launch synthesizer agent
+
+Print (State 3 — Synthesis active):
+```
+  ✓ Discovery · {N} files across {M} modules · {time}
+  ✓ Review · 5 agents · {time}
+  ──────────────────────────────────────────────────
+  ⠹ Synthesis · deduplicating
+```
 
 Launch the synthesizer agent using the **Task tool** in FOREGROUND (blocking):
 
@@ -325,9 +341,9 @@ Update `state.json`:
 - `"phase": "complete"`
 - `"phase_times": {..., "synthesis": "{elapsed}"}`
 
-Print:
+Print (collapsed Synthesis line — green ✓):
 ```
-Phase 3 complete. REVIEW_REPORT.md generated. Synthesis took {time}.
+  ✓ Synthesis · {time}
 ```
 
 ---
@@ -336,37 +352,67 @@ Phase 3 complete. REVIEW_REPORT.md generated. Synthesis took {time}.
 
 ### Step 10: Print completion summary
 
-Read final statistics from `state.json` and REVIEW_REPORT.md. Print:
+Read final statistics from `state.json` and REVIEW_REPORT.md.
 
+Read the Critical Issues section from `REVIEW_REPORT.md`. Extract each critical issue's title, one-line impact summary, and file path(s). If zero critical issues exist, extract the top 3 high-severity issues instead.
+
+Print (State 4 — Complete):
 ```
-═══════════════════════════════════════════
-  DEEP REVIEW COMPLETE
-═══════════════════════════════════════════
+  ✓ Discovery · {N} files · {time}
+  ✓ Review · 5 agents · {time}
+  ✓ Synthesis · {time}
+  ──────────────────────────────────────────────────
 
-  Duration:       {total time}
-    Discovery:    {phase 1 time}
-    Review:       {phase 2 time}
-    Synthesis:    {phase 3 time}
+  Deep Review Complete — {total time} total
 
-  Files reviewed: {count}
-  Modules documented: {count} AGENTS.md files
-
-  Findings:
-    🔴 Critical:  {N}
-    🟠 High:      {N}
-    🟡 Medium:    {N}
-    🔵 Low:       {N}
-
-  Reports:
-    → REVIEW_REPORT.md    (full findings)
-    → AGENTS.md files     (persistent documentation)
-
-  Next steps:
-    1. Read REVIEW_REPORT.md for prioritized findings
-    2. Fix 🔴 Critical issues first
-    3. Run /deep-review:maintain-docs after making changes
-═══════════════════════════════════════════
+  {N} critical  ·  {N} high  ·  {N} medium  ·  {N} low     {total} issues
 ```
+
+Print severity counts with named colors: critical count in red, high count in orange, medium count in yellow, low count in dim.
+
+Then print critical issues section. If critical issues exist:
+```
+  ── Critical ──────────────────────────────────────
+
+  1  {Issue title}
+     {Impact summary — one line}
+     → {file path(s)}
+
+  2  {Issue title}
+     {Impact summary — one line}
+     → {file path(s)}
+```
+
+If zero critical issues, show top 3 high-severity instead:
+```
+  ── High ──────────────────────────────────────────
+
+  1  {Issue title}
+     {Impact summary — one line}
+     → {file path(s)}
+```
+
+If zero critical AND zero high issues, print: `No critical or high issues found.`
+
+Then print next steps (numbered, imperative verbs — no "Consider" or "You should"):
+```
+  ── Next ──────────────────────────────────────────
+
+  1. Fix critical issues first
+  2. Read REVIEW_REPORT.md for high/medium details
+  3. Run /deep-review:maintain-docs after changes
+```
+
+Then print reports section:
+```
+  ── Reports ───────────────────────────────────────
+
+  → REVIEW_REPORT.md         full findings
+  → AGENTS.md (×{N})         module documentation
+  → .deep-review/            raw findings + state
+```
+
+Do NOT follow the summary with any prose paragraph.
 
 ---
 
@@ -376,8 +422,11 @@ If context compaction occurs at any point during the review:
 
 1. **Read state:** `cat .deep-review/state.json`
 2. **Read progress:** `cat .deep-review/progress.md`
-3. **Read batch plan:** `cat .deep-review/batch-plan.md`
-4. **Resume from where you left off:**
+3. **Parse progress.md (dual-format support):**
+   - If first line contains `<!-- progress v2 -->`: parse as key-value pairs (phase, batch, completed, severity counts, failures)
+   - Otherwise: parse as v1 Markdown format (heading-based sections with emoji severity markers)
+4. **Read batch plan:** `cat .deep-review/batch-plan.md`
+5. **Resume from where you left off:**
    - If `phase` is "discovery": Discovery agent is running or failed — check for output files and proceed to Phase 2 if they exist
    - If `phase` is "review": Check `batches_completed` and `current_batch` — skip completed batches, resume from current
    - If `phase` is "synthesis": Synthesizer is running or failed — check for REVIEW_REPORT.md

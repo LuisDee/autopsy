@@ -1,5 +1,4 @@
 ---
-name: full-review
 description: "Orchestrates a multi-agent, exhaustive code review of the entire repository across three phases: Discovery, Review, and Synthesis."
 ---
 
@@ -85,8 +84,8 @@ Launch the discovery agent using the **Task tool** in FOREGROUND (blocking):
 
 After the discovery agent completes:
 
-1. Verify `.deep-review/discovery.md` exists
-2. Verify `.deep-review/batch-plan.md` exists
+1. Check if `.deep-review/discovery.md` exists — if NOT, print "Discovery failed: discovery.md not found. Cannot proceed." and abort.
+2. Check if `.deep-review/batch-plan.md` exists — if NOT, print "Discovery failed: batch-plan.md not found. Cannot proceed." and abort.
 3. Read `.deep-review/batch-plan.md` to determine:
    - Total number of batches
    - Files per batch
@@ -104,6 +103,16 @@ Phase 1 complete. Discovered {N} files across {M} modules.
 Created {X} AGENTS.md files. Generated {B} review batches.
 Discovery took {time}.
 ```
+
+### Step 5a: Gather recent changes context
+
+If this is a git repository, capture recent intentional changes:
+
+```bash
+git log --oneline -10 2>/dev/null > .deep-review/recent-changes.txt || echo "Not a git repo" > .deep-review/recent-changes.txt
+```
+
+This file will be passed to review agents so they don't flag intentional recent changes as bugs.
 
 ---
 
@@ -146,9 +155,11 @@ Write `.deep-review/progress.md`:
 
 **This state write is critical — it enables recovery after compaction.**
 
-#### 6c. Launch 5 review agents in PARALLEL (background)
+#### 6c. Launch 5 review agents in PARALLEL (foreground)
 
-For each of the 5 review agents (bug-hunter, security-auditor, error-inspector, performance-detector, stack-reviewer), launch a Task with `run_in_background: true`:
+Launch all 5 review agents as separate foreground Task calls in a **single response**. Claude Code executes them concurrently when multiple Task calls are made in the same message. Each agent writes its own output file using the Write tool (which is fully available in foreground agents).
+
+For each of the 5 review agents (bug-hunter, security-auditor, error-inspector, performance-detector, stack-reviewer):
 
 **Prompt template for each review agent:**
 > You are the {agent-name} agent for a deep code review.
@@ -195,6 +206,8 @@ For each of the 5 review agents (bug-hunter, security-auditor, error-inspector, 
 > - Every finding needs exact file path and line number
 > - Re-read 100+ line files with zero findings
 > - Report undocumented gotchas as "Documentation Gap" findings
+> - Focus on YOUR domain expertise. If an issue clearly belongs to another agent's domain (e.g., security for bug-hunter), note it briefly as a one-liner but don't write a full finding
+> - Read `.deep-review/recent-changes.txt` for context on recent intentional changes. Do not flag recently committed changes as missing features unless there's an actual bug.
 >
 > Start your output with a header:
 > ```
@@ -215,27 +228,19 @@ For each of the 5 review agents (bug-hunter, security-auditor, error-inspector, 
 | performance-detector | `performance.md` |
 | stack-reviewer | `stack.md` |
 
-#### 6d. Poll for completion
+#### 6d. Verify agent output
 
-After launching all 5 agents, poll for output files:
+After all 5 foreground agents return, verify their output files exist:
 
 ```bash
 ls .deep-review/batch-{N}/bugs.md .deep-review/batch-{N}/security.md .deep-review/batch-{N}/errors.md .deep-review/batch-{N}/performance.md .deep-review/batch-{N}/stack.md 2>/dev/null | wc -l
 ```
 
-Wait until all 5 files exist or a reasonable timeout is reached.
-
-#### 6e. Handle agent failures
-
-If an agent's output file is missing after timeout:
-1. Log the failure to `state.json` under `"agent_failures"`
-2. Log to `progress.md`
-3. Optionally retry ONCE with a refined prompt (add: "Previous attempt may have failed. Ensure you write output to the specified file path.")
-4. If still missing after retry, note the gap and continue
+For any missing file, the agent failed to write its output. Log to `state.json` under `"agent_failures"` and to `progress.md`. Optionally retry ONCE with a refined prompt (add: "Previous attempt failed. Ensure you write output to the specified file path using the Write tool.")
 
 **Do NOT block the entire review on a single agent failure.**
 
-#### 6f. Count findings and update progress
+#### 6e. Count findings and update progress
 
 For each completed output file, count findings by severity:
 
@@ -253,7 +258,7 @@ Batch {N}/{total} complete. Found {X} issues so far.
   🔴 {n} | 🟠 {n} | 🟡 {n} | 🔵 {n}
 ```
 
-#### 6g. Batch sizing strategy
+#### 6f. Batch sizing strategy
 
 The discovery agent creates the batch plan, but the orchestrator adapts its processing strategy based on repo size:
 
@@ -309,7 +314,12 @@ After the synthesizer completes:
 
 1. Verify `REVIEW_REPORT.md` exists in the repo root
 2. If missing, retry synthesizer once
-3. Read the statistics section of REVIEW_REPORT.md for final counts
+3. If `REVIEW_REPORT.md` still does not exist after retry, create a minimal fallback report:
+   - List total files reviewed (from discovery.md)
+   - List paths to raw findings: `ls .deep-review/batch-*/*.md`
+   - Note: "Synthesis failed. Raw findings are available in the .deep-review/ directory."
+   - This preserves the review work instead of losing it entirely.
+4. Read the statistics section of REVIEW_REPORT.md for final counts
 
 Update `state.json`:
 - `"phase": "complete"`

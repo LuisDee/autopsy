@@ -2,20 +2,16 @@
   "name": "deep-review",
   "version": "1.0.0",
   "description": "Multi-agent code review plugin. Use /deep-review:full-review for exhaustive repository analysis and /deep-review:maintain-docs for documentation maintenance.",
-  "commands": [
-    "commands/full-review.md",
-    "commands/maintain-docs.md"
-  ],
   "agents": [
-    "agents/discovery.md",
-    "agents/bug-hunter.md",
-    "agents/security-auditor.md",
-    "agents/error-inspector.md",
-    "agents/performance-detector.md",
-    "agents/stack-reviewer.md",
-    "agents/synthesizer.md"
+    "./agents/discovery.md",
+    "./agents/bug-hunter.md",
+    "./agents/security-auditor.md",
+    "./agents/error-inspector.md",
+    "./agents/performance-detector.md",
+    "./agents/stack-reviewer.md",
+    "./agents/synthesizer.md"
   ],
   "skills": [
-    "skills/codebase-documentation"
+    "./skills/codebase-documentation"
   ]
 }

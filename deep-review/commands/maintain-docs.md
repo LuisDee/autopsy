@@ -1,5 +1,4 @@
 ---
-name: maintain-docs
 description: "Detects git changes and incrementally updates AGENTS.md files to keep documentation in sync with the codebase."
 ---
 
@@ -13,22 +12,36 @@ You are the documentation maintenance command for deep-review. When the user run
 
 ## Step 1: Detect Changes
 
+First, verify this is a git repository:
+
+```bash
+git rev-parse --git-dir > /dev/null 2>&1
+```
+
+If this fails, print: "Error: maintain-docs requires a git repository. Use /deep-review:full-review for non-git repos." and exit.
+
+Create a temporary file for tracking changes:
+
+```bash
+CHANGES_FILE=$(mktemp)
+```
+
 Identify what files changed recently using both commit history and time-based detection (whichever captures more):
 
 ```bash
-# Changed files in last 10 commits
-git diff --name-only HEAD~10 2>/dev/null | sort -u > /tmp/deep-review-changes.txt
+# Changed files in last 10 commits (handle repos with fewer than 10 commits)
+git diff --name-only HEAD~10 2>/dev/null || git diff --name-only $(git rev-list --max-parents=0 HEAD) 2>/dev/null | sort -u > "$CHANGES_FILE"
 
 # Changed files in last 7 days
-git log --since="7 days ago" --name-only --pretty=format: 2>/dev/null | sort -u | grep -v '^$' >> /tmp/deep-review-changes.txt
+git log --since="7 days ago" --name-only --pretty=format: 2>/dev/null | sort -u | grep -v '^$' >> "$CHANGES_FILE"
 
 # Deduplicate
-sort -u /tmp/deep-review-changes.txt > /tmp/deep-review-changes-dedup.txt
-mv /tmp/deep-review-changes-dedup.txt /tmp/deep-review-changes.txt
+sort -u "$CHANGES_FILE" > "${CHANGES_FILE}.dedup"
+mv "${CHANGES_FILE}.dedup" "$CHANGES_FILE"
 
 # Show what we found
 echo "Changed files:"
-cat /tmp/deep-review-changes.txt
+cat "$CHANGES_FILE"
 ```
 
 If no changes detected (empty list), print "No changes detected in last 10 commits or 7 days." and exit.
@@ -40,7 +53,7 @@ If no changes detected (empty list), print "No changes detected in last 10 commi
 Extract unique directories from the changed file list:
 
 ```bash
-cat /tmp/deep-review-changes.txt | xargs -I{} dirname {} | sort -u
+cat $CHANGES_FILE | xargs -I{} dirname {} | sort -u
 ```
 
 For each affected directory, determine if it has an existing AGENTS.md.

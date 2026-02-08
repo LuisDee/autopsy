@@ -27,7 +27,11 @@ This skill helps maintain living AGENTS.md documentation during everyday develop
 - The current task is explicitly about reviewing or auditing code
 - The user is running `/deep-review:full-review` or `/deep-review:maintain-docs`
 
-To detect: check if `.deep-review/state.json` exists and has `"phase"` set to anything other than `"complete"`. If so, a deep-review is in progress — do not activate.
+To detect: Check if `.deep-review/state.json` exists. If it does, read the `"phase"` field:
+- If phase is "discovery", "review", or "synthesis" — deep-review is active, do NOT activate
+- If phase is "complete" — previous review finished, activate normally
+- If state.json does not exist — no review in progress, activate normally
+- If state.json exists but was last modified more than 6 hours ago and phase is not "complete" — review was likely abandoned, activate normally
 
 ---
 

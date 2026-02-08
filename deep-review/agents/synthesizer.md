@@ -66,6 +66,12 @@ When 2 or more agents independently flag the same issue:
 
 **IMPORTANT:** Confidence is elevated, NOT severity. Severity is based on impact, not consensus.
 
+### Confidence Filtering (after elevation)
+- **High confidence:** Always include in main report
+- **Medium confidence:** Include if severity is HIGH or CRITICAL
+- **Low confidence (singleton):** Move to "Unverified Findings" appendix unless severity is CRITICAL
+- **Low confidence (multi-agent):** Already elevated to Medium — include per above
+
 After dedup, sort the master list by:
 1. Severity (Critical → High → Medium → Low)
 2. Confidence (High → Medium → Low)
@@ -112,11 +118,13 @@ Look for:
 Run the appropriate audit commands (handle missing tools gracefully):
 
 ```bash
-pip audit 2>/dev/null || safety check 2>/dev/null || echo "No Python audit tool available"
-npm audit --json 2>/dev/null | head -100 || echo "No npm available"
-govulncheck ./... 2>/dev/null || echo "No govulncheck available"
-cargo audit 2>/dev/null || echo "No cargo-audit available"
+pip audit 2>&1 | head -20 || echo "TOOL_NOT_FOUND: pip audit"
+npm audit --json 2>&1 | head -100 || echo "TOOL_NOT_FOUND: npm audit"
+govulncheck ./... 2>&1 | head -20 || echo "TOOL_NOT_FOUND: govulncheck"
+cargo audit 2>&1 | head -20 || echo "TOOL_NOT_FOUND: cargo audit"
 ```
+
+For each command: if output contains "command not found" or "TOOL_NOT_FOUND", report in REVIEW_REPORT.md: "Dependency audit: {tool} not installed. Install with {install command} for vulnerability scanning." Do NOT report as "No vulnerabilities found."
 
 Also check for:
 - Unused dependencies (declared but never imported)

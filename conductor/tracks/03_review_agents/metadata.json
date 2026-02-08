@@ -1,6 +1,6 @@
 {
   "track_id": "03_review_agents",
-  "state": "IN_PROGRESS",
+  "state": "COMPLETE",
   "complexity": "L",
   "wave": 2,
 
@@ -18,5 +18,5 @@
 
   "created_at": "2026-02-07T23:30:00Z",
   "started_at": "2026-02-08T00:20:00Z",
-  "completed_at": null
+  "completed_at": "2026-02-08T00:30:00Z"
 }

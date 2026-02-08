@@ -8,4 +8,4 @@
 | 04_synthesizer_agent | Synthesizer Agent | 2 | M | complete | 01_plugin_scaffold |
 | 05_orchestrator_command | Orchestrator Command | 3 | XL | complete | 02_discovery_agent, 03_review_agents, 04_synthesizer_agent |
 | 06_secondary_commands | Secondary Commands | 3 | M | complete | 01_plugin_scaffold, 02_discovery_agent |
-| 07_output_rendering | Output Rendering Overhaul | 4 | L | in_progress | 05_orchestrator_command, 06_secondary_commands, 03_review_agents, 04_synthesizer_agent |
+| 07_output_rendering | Output Rendering Overhaul | 4 | L | complete | 05_orchestrator_command, 06_secondary_commands, 03_review_agents, 04_synthesizer_agent |

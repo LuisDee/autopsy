@@ -19,7 +19,7 @@
   - [ ] Verify anti-patterns list complete
   - [ ] Verify final summary rules match (severity line, critical issues, next steps, reports)
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Output Rendering Guide' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Output Rendering Guide' (Protocol in workflow.md)
 
 ## Phase 2: full-review.md Terminal Output Overhaul
 
@@ -65,7 +65,7 @@
   - [ ] Preserve existing v1 parsing logic (Markdown with emoji)
   - [ ] Document both formats in recovery instructions
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: full-review.md Overhaul' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: full-review.md Overhaul' (Protocol in workflow.md)
 
 ## Phase 3: maintain-docs.md Output Overhaul
 
@@ -78,11 +78,11 @@
   - [ ] Replace file lists with → arrow format
   - [ ] Replace next steps with imperative format
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: maintain-docs.md Overhaul' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: maintain-docs.md Overhaul' (Protocol in workflow.md)
 
 ## Phase 4: Validation and Cross-Reference
 
-- [ ] Task 4.1: Cross-reference all changes against full-output-spec.md
+- [x] Task 4.1: Cross-reference all changes against full-output-spec.md
   - [ ] Verify full-review.md output matches all 4 states in full-output-spec.md
   - [ ] Verify final summary matches STATE 4 example exactly
   - [ ] Verify all anti-patterns are eliminated from full-review.md and maintain-docs.md
@@ -91,9 +91,9 @@
   - [ ] Verify no filler text patterns remain
   - [ ] Verify agent definitions, batch findings, and REVIEW_REPORT.md are NOT modified (NFR-1, NFR-3)
 
-- [ ] Task 4.2: Verify plugin structure and loading
+- [x] Task 4.2: Verify plugin structure and loading
   - [ ] Run `find deep-review/ -type f | sort` to verify file structure
   - [ ] Validate plugin.json: `python3 -c "import json; json.load(open('deep-review/.claude-plugin/plugin.json'))"`
   - [ ] Verify references/ directory is properly placed within plugin
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Validation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Validation' (Protocol in workflow.md)

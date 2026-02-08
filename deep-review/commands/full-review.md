@@ -4,10 +4,10 @@ description: "Orchestrates a multi-agent, exhaustive code review of the entire r
 
 # Deep Review: Full Review
 
-You are the orchestrator for a deep, multi-agent code review. You coordinate three phases:
+You are the orchestrator for a deep, multi-agent code review and architecture assessment. You coordinate three phases:
 1. **Discovery** — Map the repo, generate documentation, create a batch plan
-2. **Review** — Launch 5 specialized agents in parallel per batch
-3. **Synthesis** — Deduplicate findings, cross-cut analysis, produce final report
+2. **Review + Architecture** — Launch 5 code review agents per batch in parallel; architect and researcher agents run alongside the first batch
+3. **Synthesis** — Deduplicate code review findings and produce REVIEW_REPORT.md; architecture-synthesizer cross-references analysis and produces ARCHITECTURE_REPORT.md
 
 **CRITICAL RULES:**
 - You NEVER read source code files directly — only batch plans, progress files, and output existence checks
@@ -45,7 +45,12 @@ Write initial state:
   "batches_completed": 0,
   "findings": {"critical": 0, "high": 0, "medium": 0, "low": 0},
   "agent_failures": [],
-  "false_positives_removed": 0
+  "false_positives_removed": 0,
+  "phase_2a_status": "pending",
+  "phase_3a_status": "pending",
+  "architecture_analysis_exists": false,
+  "best_practices_research_exists": false,
+  "architecture_report_exists": false
 }
 ```
 
@@ -66,7 +71,7 @@ Update `state.json`: set `"phase": "discovery"`.
 Print (State 1 — Discovery active):
 ```
   ⠹ Discovery · scanning repository...
-  ◇ Review
+  ◇ Review + Architecture
   ◇ Synthesis
 ```
 
@@ -122,19 +127,59 @@ This file will be passed to review agents so they don't flag intentional recent 
 
 ---
 
-## Phase 2: Review
+## Phase 2: Review + Architecture
+
+### Step 5b: Prepare architecture agent prompts
+
+The architect and researcher agents will launch alongside the first review batch. Prepare their prompts now.
+
+**Prompt for the architect agent:**
+> You are the architect agent for a deep architecture assessment. Your job is to analyze the system's architecture: components, interactions, tooling choices, quality attributes, and design gaps.
+>
+> First read `.deep-review/discovery.md` for the full repository map and module inventory.
+>
+> Then follow the instructions in your agent definition file (`agents/architect.md`) exactly. Complete all 6 steps:
+> 1. Infer the System Goal
+> 2. Decompose into Components
+> 3. Analyze Component Interactions
+> 4. Evaluate Tooling Choices
+> 5. Quality Attribute Tradeoff Analysis
+> 6. Identify Design Gaps
+>
+> Write your output to `.deep-review/architecture-analysis.md`.
+>
+> Run your self-review checklist before completing.
+
+**Prompt for the researcher agent:**
+> You are the researcher agent for a deep architecture assessment. Your job is to research official documentation, best practices, and recommended patterns for every major technology in the stack.
+>
+> First read `.deep-review/discovery.md` to identify the technologies and architectural patterns in use.
+>
+> Then follow the instructions in your agent definition file (`agents/researcher.md`) exactly. Complete all 5 steps:
+> 1. Identify Research Targets
+> 2. Research Each Technology
+> 3. Research the Architectural Pattern
+> 4. Research Alternative Tools
+> 5. Research Interaction Patterns
+>
+> Write your output to `.deep-review/best-practices-research.md`.
+>
+> Run your self-review checklist before completing.
+
+Update `state.json`: set `"phase_2a_status": "running"`.
 
 ### Step 6: Process batches sequentially
 
 For each batch in the batch plan (highest risk first).
 
-Print (State 2 — Review active):
+Print (State 2 — Review + Architecture active):
 ```
   ✓ Discovery · {N} files across {M} modules · {time}
   ──────────────────────────────────────────────────
   ⠹ Review · batch {N}/{total} · {files} files, ~{LOC} LOC
+  ⠹ Architecture · analyzing...
 
-  ◇ Next: synthesize → REVIEW_REPORT.md
+  ◇ Next: synthesize → REVIEW_REPORT.md + ARCHITECTURE_REPORT.md
 ```
 
 For each batch:
@@ -159,13 +204,18 @@ batch: {N}/{total}
 completed: {comma-separated list of completed batch numbers}
 critical: {N} | high: {N} | medium: {N} | low: {N}
 failures: {comma-separated list or "none"}
+arch: {pending|running|complete|failed}
 ```
 
 **This state write is critical — it enables recovery after compaction.**
 
-#### 6c. Launch 5 review agents in PARALLEL (foreground)
+#### 6c. Launch review agents (and architecture agents for first batch) in PARALLEL (foreground)
 
-Launch all 5 review agents as separate foreground Task calls in a **single response**. Claude Code executes them concurrently when multiple Task calls are made in the same message. Each agent writes its own output file using the Write tool (which is fully available in foreground agents).
+Launch review agents as separate foreground Task calls in a **single response**. Claude Code executes them concurrently when multiple Task calls are made in the same message. Each agent writes its own output file using the Write tool (which is fully available in foreground agents).
+
+**For the FIRST batch only:** Launch 7 agents in a single message — the 5 review agents PLUS the architect and researcher agents (using the prompts from Step 5b). All 7 run concurrently as parallel foreground calls.
+
+**For subsequent batches (batch 2+):** Launch only the 5 review agents as normal.
 
 For each of the 5 review agents (bug-hunter, security-auditor, error-inspector, performance-detector, stack-reviewer):
 
@@ -238,7 +288,7 @@ For each of the 5 review agents (bug-hunter, security-auditor, error-inspector, 
 
 #### 6d. Verify agent output
 
-After all 5 foreground agents return, verify their output files exist:
+After all foreground agents return, verify their output files exist:
 
 ```bash
 ls .deep-review/batch-{N}/bugs.md .deep-review/batch-{N}/security.md .deep-review/batch-{N}/errors.md .deep-review/batch-{N}/performance.md .deep-review/batch-{N}/stack.md 2>/dev/null | wc -l
@@ -247,6 +297,22 @@ ls .deep-review/batch-{N}/bugs.md .deep-review/batch-{N}/security.md .deep-revie
 For any missing file, the agent failed to write its output. Log to `state.json` under `"agent_failures"` and to `progress.md`. Optionally retry ONCE with a refined prompt (add: "Previous attempt failed. Ensure you write output to the specified file path using the Write tool.")
 
 **Do NOT block the entire review on a single agent failure.**
+
+#### 6d-arch. Verify architecture output (first batch only)
+
+After the first batch completes, also verify the architecture agent outputs:
+
+```bash
+ls .deep-review/architecture-analysis.md .deep-review/best-practices-research.md 2>/dev/null | wc -l
+```
+
+- If both files exist: update `state.json` with `"phase_2a_status": "complete"`, `"architecture_analysis_exists": true`, `"best_practices_research_exists": true`.
+- If one or both are missing: log to `"agent_failures"`, retry the missing agent(s) ONCE. If still missing after retry, set `"phase_2a_status": "failed"` and update the boolean flags accordingly. **Continue with code review — architecture failure never blocks the review pipeline.**
+
+Print architecture status after first batch:
+- Success: `✓ Architecture · {time}`
+- Partial: `✓ Architecture · partial ({which} completed)`
+- Failed: `✗ Architecture · failed (partial report available)`
 
 #### 6e. Count findings and update progress
 
@@ -280,7 +346,7 @@ The discovery agent creates the batch plan, but the orchestrator adapts its proc
 
 ### Step 7: Phase 2 summary
 
-After all batches complete:
+After all batches complete (and architecture agents have finished or failed):
 
 Update `state.json`:
 - `"phase": "synthesis"`
@@ -290,6 +356,10 @@ Print (collapsed Review line — green ✓):
 ```
   ✓ Review · 5 agents · {time}
 ```
+
+Print architecture status line (already printed after first batch in Step 6d-arch, but confirm here):
+- If `phase_2a_status` is "complete": `✓ Architecture · {time}`
+- If `phase_2a_status` is "failed": `✗ Architecture · failed`
 
 ---
 

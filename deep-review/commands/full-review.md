@@ -365,19 +365,24 @@ Print architecture status line (already printed after first batch in Step 6d-arc
 
 ## Phase 3: Synthesis
 
-### Step 8: Launch synthesizer agent
+### Step 8: Launch both synthesizers in PARALLEL
 
 Print (State 3 — Synthesis active):
 ```
   ✓ Discovery · {N} files across {M} modules · {time}
   ✓ Review · 5 agents · {time}
+  ✓ Architecture · {time}
   ──────────────────────────────────────────────────
-  ⠹ Synthesis · deduplicating
+  ⠹ Synthesis · deduplicating + architecture report
 ```
 
-Launch the synthesizer agent using the **Task tool** in FOREGROUND (blocking):
+If `phase_2a_status` is "failed", replace the Architecture line with `✗ Architecture · failed`.
 
-**Prompt for the synthesizer agent:**
+Update `state.json`: set `"phase_3a_status": "running"`.
+
+Launch BOTH synthesizers as separate foreground Task calls in a **single response** (2 parallel tasks):
+
+**Prompt for the code review synthesizer (unchanged):**
 > You are the synthesizer for a deep code review. Your job is to read all findings, deduplicate them, spot-check top issues, perform cross-cutting analysis, and produce the final report.
 >
 > Follow the instructions in your agent definition file (`agents/synthesizer.md`) exactly. Complete all 5 steps:
@@ -394,18 +399,56 @@ Launch the synthesizer agent using the **Task tool** in FOREGROUND (blocking):
 >
 > Run your self-review checklist before completing.
 
+**Prompt for the architecture-synthesizer:**
+> You are the architecture-synthesizer for a deep architecture assessment. Your job is to cross-reference all architecture analysis inputs and produce the final ARCHITECTURE_REPORT.md.
+>
+> Follow the instructions in your agent definition file (`agents/architecture-synthesizer.md`) exactly. Complete all 4 steps:
+> 1. Read all inputs from `.deep-review/` (architecture-analysis.md, best-practices-research.md, discovery.md, batch-*/*.md for code evidence)
+> 2. Cross-reference design gaps vs research, tooling vs research, code findings as evidence
+> 3. Generate design recommendations with priority, effort, impact, and evidence
+> 4. Write ARCHITECTURE_REPORT.md to the repo root
+>
+> **Important:**
+> - If any input file is missing, follow your missing-input handling logic to produce a partial report with placeholders
+> - Include evidence from code review findings where they support architecture recommendations
+> - Every recommendation must cite specific evidence (analysis finding, research source, or code example)
+>
+> Run your self-review checklist before completing.
+
+If `phase_2a_status` is "failed", prepend this to the architecture-synthesizer prompt:
+> **Note:** Some architecture analysis inputs may be missing (architecture agents failed during Phase 2A). Follow your missing-input handling logic to produce a partial report noting which inputs were unavailable.
+
 ### Step 9: Verify synthesis output
 
-After the synthesizer completes:
+After both synthesizers complete:
 
+**9a. Verify code review synthesis:**
 1. Verify `REVIEW_REPORT.md` exists in the repo root
-2. If missing, retry synthesizer once
+2. If missing, retry code review synthesizer once
 3. If `REVIEW_REPORT.md` still does not exist after retry, create a minimal fallback report:
    - List total files reviewed (from discovery.md)
    - List paths to raw findings: `ls .deep-review/batch-*/*.md`
    - Note: "Synthesis failed. Raw findings are available in the .deep-review/ directory."
    - This preserves the review work instead of losing it entirely.
 4. Read the statistics section of REVIEW_REPORT.md for final counts
+
+**9b. Verify architecture synthesis:**
+1. Verify `ARCHITECTURE_REPORT.md` exists in the repo root
+2. If missing, retry architecture-synthesizer once
+3. If `ARCHITECTURE_REPORT.md` still does not exist after retry, create a minimal fallback:
+   ```markdown
+   # Architecture Report
+
+   Architecture synthesis was unable to complete.
+
+   ## Partial Results
+   - architecture-analysis.md: {exists/missing}
+   - best-practices-research.md: {exists/missing}
+
+   ## Raw Data
+   Available inputs are in `.deep-review/`. Run a full review again to regenerate.
+   ```
+4. Update `state.json`: `"phase_3a_status": "complete"` or `"phase_3a_status": "failed"`, `"architecture_report_exists": true/false`
 
 Update `state.json`:
 - `"phase": "complete"`
@@ -430,6 +473,7 @@ Print (State 4 — Complete):
 ```
   ✓ Discovery · {N} files · {time}
   ✓ Review · 5 agents · {time}
+  ✓ Architecture · {time}
   ✓ Synthesis · {time}
   ──────────────────────────────────────────────────
 
@@ -437,6 +481,8 @@ Print (State 4 — Complete):
 
   {N} critical  ·  {N} high  ·  {N} medium  ·  {N} low     {total} issues
 ```
+
+If `phase_2a_status` is "failed", replace the Architecture line with `✗ Architecture · failed`.
 
 Print severity counts with named colors: critical count in red, high count in orange, medium count in yellow, low count in dim.
 
@@ -465,19 +511,44 @@ If zero critical issues, show top 3 high-severity instead:
 If zero critical AND zero high issues, print: `No critical or high issues found.`
 
 Then print next steps (numbered, imperative verbs — no "Consider" or "You should"):
+
+If architecture succeeded:
 ```
   ── Next ──────────────────────────────────────────
 
   1. Fix critical issues first
-  2. Read REVIEW_REPORT.md for high/medium details
-  3. Run /deep-review:maintain-docs after changes
+  2. Read REVIEW_REPORT.md for code-level details
+  3. Read ARCHITECTURE_REPORT.md for design-level assessment
+  4. Run /deep-review:maintain-docs after changes
+```
+
+If architecture failed:
+```
+  ── Next ──────────────────────────────────────────
+
+  1. Fix critical issues first
+  2. Read REVIEW_REPORT.md for code-level details
+  3. Re-run full review to regenerate architecture assessment
+  4. Run /deep-review:maintain-docs after changes
 ```
 
 Then print reports section:
+
+If architecture succeeded:
 ```
   ── Reports ───────────────────────────────────────
 
-  → REVIEW_REPORT.md         full findings
+  → REVIEW_REPORT.md         code review findings
+  → ARCHITECTURE_REPORT.md   design assessment
+  → AGENTS.md (×{N})         module documentation
+  → .deep-review/            raw findings + state
+```
+
+If architecture failed (omit ARCHITECTURE_REPORT.md line):
+```
+  ── Reports ───────────────────────────────────────
+
+  → REVIEW_REPORT.md         code review findings
   → AGENTS.md (×{N})         module documentation
   → .deep-review/            raw findings + state
 ```
@@ -493,13 +564,16 @@ If context compaction occurs at any point during the review:
 1. **Read state:** `cat .deep-review/state.json`
 2. **Read progress:** `cat .deep-review/progress.md`
 3. **Parse progress.md (dual-format support):**
-   - If first line contains `<!-- progress v2 -->`: parse as key-value pairs (phase, batch, completed, severity counts, failures)
+   - If first line contains `<!-- progress v2 -->`: parse as key-value pairs (phase, batch, completed, severity counts, failures, arch)
    - Otherwise: parse as v1 Markdown format (heading-based sections with emoji severity markers)
 4. **Read batch plan:** `cat .deep-review/batch-plan.md`
-5. **Resume from where you left off:**
+5. **Recover architecture state:**
+   - If `phase_2a_status` is "running": check for `.deep-review/architecture-analysis.md` and `.deep-review/best-practices-research.md`. If both exist, set `phase_2a_status` to "complete". If missing, set to "failed". **Architecture recovery never blocks code review recovery.**
+   - If `phase_3a_status` is "running": check for `ARCHITECTURE_REPORT.md`. If exists, set to "complete". If missing and Phase 2 code review is complete, retry architecture-synthesizer once. If still missing, set to "failed".
+6. **Resume from where you left off:**
    - If `phase` is "discovery": Discovery agent is running or failed — check for output files and proceed to Phase 2 if they exist
-   - If `phase` is "review": Check `batches_completed` and `current_batch` — skip completed batches, resume from current
-   - If `phase` is "synthesis": Synthesizer is running or failed — check for REVIEW_REPORT.md
+   - If `phase` is "review": Check `batches_completed` and `current_batch` — skip completed batches, resume from current. Also check architecture state per Step 5 above.
+   - If `phase` is "synthesis": Check for REVIEW_REPORT.md and ARCHITECTURE_REPORT.md — retry missing synthesizers
    - If `phase` is "complete": Print the final summary
 
 **This recovery logic is the reason we write state to disk before every batch.** Auto-compaction can happen at any time — the review must be resilient to it.
@@ -515,4 +589,9 @@ If context compaction occurs at any point during the review:
 | All 5 agents fail for a batch | Log as failed batch, continue to next batch |
 | Synthesizer fails | Retry once. If still fails, point user to raw findings in `.deep-review/batch-*/` |
 | REVIEW_REPORT.md missing | Retry synthesizer. If still missing, create a minimal report listing raw finding file paths |
-| Context compaction | Re-read state.json + progress.md + batch-plan.md, resume |
+| Architect agent output missing | Log failure, retry once. If still missing, mark phase_2a as failed, continue code review |
+| Researcher agent output missing | Log failure, retry once. If still missing, mark phase_2a as failed, continue code review |
+| Architecture-synthesizer fails | Retry once. If still fails, create minimal fallback ARCHITECTURE_REPORT.md |
+| ARCHITECTURE_REPORT.md missing | Retry architecture-synthesizer. If still missing, create fallback report |
+| Architecture compaction recovery | Check output files exist, mark phase complete or failed accordingly |
+| Context compaction | Re-read state.json + progress.md + batch-plan.md, recover architecture state, resume |

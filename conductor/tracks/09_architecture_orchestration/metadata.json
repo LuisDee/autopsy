@@ -1,6 +1,6 @@
 {
   "track_id": "09_architecture_orchestration",
-  "state": "IN_PROGRESS",
+  "state": "COMPLETE",
   "complexity": "M",
   "wave": 5,
   "cc_version_at_brief": "v1",
@@ -37,5 +37,5 @@
   "patches": [],
   "created_at": "2026-02-08T12:00:00Z",
   "started_at": "2026-02-08T14:00:00Z",
-  "completed_at": null
+  "completed_at": "2026-02-08T14:30:00Z"
 }

@@ -7,15 +7,15 @@ Command definitions for user-facing slash commands in the deep-review plugin. Co
 ## Key Files
 | File | Purpose | Key Exports |
 |------|---------|-------------|
-| `full-review.md` | Main orchestrator command | 3-phase review pipeline coordination |
+| `full-review.md` | Main orchestrator command | Review + architecture pipeline coordination |
 | `maintain-docs.md` | Documentation updater | Incremental AGENTS.md updates after code changes |
 
 ## Data Flow
-`full-review.md`: User invokes → creates .deep-review/ → launches discovery (foreground) → reads batch-plan.md → for each batch: launches 5 agents (parallel foreground) → verifies outputs → launches synthesizer (foreground) → prints summary
+`full-review.md`: User invokes → creates .deep-review/ → launches discovery (foreground) → reads batch-plan.md → first batch: launches 7 agents (5 review + architect + researcher, parallel foreground) → subsequent batches: 5 review agents → verifies all outputs → launches both synthesizers in parallel (code review + architecture) → verifies REVIEW_REPORT.md + ARCHITECTURE_REPORT.md → prints summary
 `maintain-docs.md`: User invokes → git diff detects changed files → identifies affected directories → updates AGENTS.md in those dirs → validates coverage
 
 ## Dependencies
-- Internal: All 7 agents (discovery, 5 review agents, synthesizer)
+- Internal: All 10 agents (discovery, 5 review agents, architect, researcher, synthesizer, architecture-synthesizer)
 - External: Git (for maintain-docs change detection), Task tool (for agent launching)
 
 ## Patterns & Conventions

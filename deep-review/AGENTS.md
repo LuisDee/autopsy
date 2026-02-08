@@ -2,20 +2,23 @@
 # deep-review Plugin
 
 ## Purpose
-Main plugin directory containing all agent definitions, commands, and skills for the deep-review Claude Code plugin. Implements a 3-phase orchestrator-worker pattern for autonomous repository analysis.
+Main plugin directory containing all agent definitions, commands, and skills for the deep-review Claude Code plugin. Implements an orchestrator-worker pattern for autonomous code review and architecture assessment, producing REVIEW_REPORT.md and ARCHITECTURE_REPORT.md.
 
 ## Key Files
 | File | Purpose | Key Exports |
 |------|---------|-------------|
-| `.claude-plugin/plugin.json` | Plugin manifest | Declares 7 agents, 2 commands, 1 skill |
+| `.claude-plugin/plugin.json` | Plugin manifest | Declares 10 agents, 2 commands, 1 skill |
 | `README.md` | User-facing documentation | Installation, usage, architecture |
 | `agents/discovery.md` | Phase 1 agent | Maps repo, creates AGENTS.md files, produces batch plan |
+| `agents/architect.md` | Phase 2A agent | ATAM-inspired architecture analysis |
+| `agents/researcher.md` | Phase 2A agent | Technology best-practices research via web search |
 | `agents/synthesizer.md` | Phase 3 agent | Deduplicates findings, writes REVIEW_REPORT.md |
-| `commands/full-review.md` | Main orchestrator | Coordinates all 3 phases |
+| `agents/architecture-synthesizer.md` | Phase 3 agent | Cross-references architecture inputs, writes ARCHITECTURE_REPORT.md |
+| `commands/full-review.md` | Main orchestrator | Coordinates discovery, review+architecture, and synthesis phases |
 | `commands/maintain-docs.md` | Incremental doc updater | Updates AGENTS.md after code changes |
 
 ## Data Flow
-User invokes `/deep-review:full-review` → orchestrator creates `.deep-review/` → launches discovery agent → reads batch plan → launches 5 review agents per batch in parallel → polls for output files → launches synthesizer → verifies REVIEW_REPORT.md → prints summary
+User invokes `/deep-review:full-review` → orchestrator creates `.deep-review/` → launches discovery agent → reads batch plan → launches 5 review agents + architect + researcher (7 parallel for first batch) → verifies outputs → launches both synthesizers in parallel (code review + architecture) → verifies REVIEW_REPORT.md + ARCHITECTURE_REPORT.md → prints summary
 
 ## Dependencies
 - Internal: None (self-contained plugin)
@@ -23,7 +26,7 @@ User invokes `/deep-review:full-review` → orchestrator creates `.deep-review/`
 
 ## Patterns & Conventions
 - File-based IPC: All agents write to `.deep-review/`, orchestrator reads from disk
-- All agents run foreground (blocking): Discovery and Synthesizer run sequentially, 5 review agents run as parallel foreground Task calls in a single message
+- All agents run foreground (blocking): Discovery runs sequentially, 5 review agents + 2 architecture agents run as parallel foreground Task calls (7 for first batch), both synthesizers run in parallel
 - Dual state tracking: `state.json` (machine-readable), `progress.md` (human-readable)
 - Self-review steps: Every agent verifies output completeness before finishing
 - Few-shot examples: 2-3 concrete findings per review agent definition

@@ -2,7 +2,7 @@
 
 | ID | Name | Wave | Complexity | Status | Dependencies |
 |----|------|------|------------|--------|-------------|
-| 01_plugin_scaffold | Plugin Scaffold | 1 | S | not started | — |
+| 01_plugin_scaffold | Plugin Scaffold | 1 | S | complete | — |
 | 02_discovery_agent | Discovery Agent | 2 | M | not started | 01_plugin_scaffold |
 | 03_review_agents | Review Agents | 2 | L | not started | 01_plugin_scaffold |
 | 04_synthesizer_agent | Synthesizer Agent | 2 | M | not started | 01_plugin_scaffold |

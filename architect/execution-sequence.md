@@ -62,12 +62,49 @@
 
 ---
 
+## Wave 4 — Output Rendering
+
+| # | Track ID | Complexity | Description |
+|---|----------|------------|-------------|
+| 07 | 07_output_rendering | L | Terminal output overhaul: rendering guide, progress bars, consistent formatting |
+
+### Wave 4 Completion Criteria
+- [x] All phases in all wave tracks marked complete
+- [x] Output rendering guide exists at `references/output-rendering.md`
+- [x] All commands follow the rendering guide conventions
+- [x] Phase collapsing, symbols, colors, anti-patterns applied consistently
+
+---
+
+## Wave 5 — Architecture Assessment
+
+| # | Track ID | Complexity | Description |
+|---|----------|------------|-------------|
+| 08 | 08_architecture_agents | L | 3 new agents: architect (ATAM-inspired analysis), researcher (docs/best-practices lookup), architecture-synthesizer (ARCHITECTURE_REPORT.md) |
+| 09 | 09_architecture_orchestration | M | Integrate architecture agents into full-review: Phase 2A parallel with code review, architecture-synthesizer in Phase 3, plugin.json + README updates |
+
+### Wave 5 Completion Criteria
+- [ ] All phases in all wave tracks marked complete
+- [ ] 3 new agent definitions exist in `agents/` (architect.md, researcher.md, architecture-synthesizer.md)
+- [ ] Each agent has YAML frontmatter, checklists, few-shot examples, self-review step
+- [ ] `commands/full-review.md` launches architecture agents in Phase 2A
+- [ ] Architecture-synthesizer runs in Phase 3 alongside existing synthesizer
+- [ ] `ARCHITECTURE_REPORT.md` generated as separate output from `REVIEW_REPORT.md`
+- [ ] `plugin.json` registers all 10 agents
+- [ ] `README.md` documents both reports
+- [ ] Final summary shows both reports
+- [ ] Plugin loads successfully: `claude --plugin-dir ./deep-review`
+
+---
+
 ## Progress Summary
 
 | Wave | Tracks | Total Complexity | Status |
 |------|--------|-----------------|--------|
-| 1 | 1 | 1 (S) | NOT_STARTED |
-| 2 | 3 | 7 (M+L+M) | NOT_STARTED |
-| 3 | 2 | 6 (XL+M) | NOT_STARTED |
+| 1 | 1 | 1 (S) | COMPLETE |
+| 2 | 3 | 7 (M+L+M) | COMPLETE |
+| 3 | 2 | 6 (XL+M) | COMPLETE |
+| 4 | 1 | 3 (L) | COMPLETE |
+| 5 | 2 | 5 (L+M) | NOT_STARTED |
 
-Overall: 0/14 complexity-weighted units complete (0%)
+Overall: 17/22 complexity-weighted units complete (77%)

@@ -77,6 +77,42 @@
 
 ---
 
+### Architecture Agents → Architecture Synthesizer
+
+**Owner:** Track 08_architecture_agents
+
+| File | Format | Purpose |
+|------|--------|---------|
+| `.deep-review/architecture-analysis.md` | Markdown (structured sections) | Architect agent output: component map, interactions, tooling evaluation, quality attributes, design gaps |
+| `.deep-review/best-practices-research.md` | Markdown (structured sections) | Researcher agent output: per-technology research, pattern research, alternative tools |
+
+**Consumed by:** Track 08_architecture_agents (architecture-synthesizer reads both)
+
+---
+
+### Architecture Synthesizer → User
+
+**Owner:** Track 08_architecture_agents
+
+| File | Format | Purpose |
+|------|--------|---------|
+| `ARCHITECTURE_REPORT.md` | Markdown (report template — 7 sections + appendices) | Final architecture assessment report |
+
+**Consumed by:** User (reads directly, alongside REVIEW_REPORT.md)
+
+---
+
+### Orchestrator → Architecture Agents
+
+**Owner:** Track 09_architecture_orchestration
+
+| Data | Passed Via | Purpose |
+|------|-----------|---------|
+| Discovery context path | Task tool `prompt` parameter | Points architecture agents to discovery.md and AGENTS.md files |
+| Output file path | Task tool `prompt` parameter | Tells each architecture agent where to write results |
+
+---
+
 ## Shared Data Schemas
 
 ### Finding Format (used by all review agents)

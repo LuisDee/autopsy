@@ -8,6 +8,8 @@ You are the documentation maintenance command for deep-review. When the user run
 
 **Key principle:** Only update what actually changed. Don't rewrite everything. Be specific. Append, don't replace.
 
+Follow the output rendering guide at `references/output-rendering.md` for all terminal output formatting. Use the exact symbols, colors, and patterns defined there. Never use banned patterns.
+
 ---
 
 ## Step 1: Detect Changes
@@ -175,24 +177,46 @@ done
 
 ## Step 7: Print Summary
 
+Print:
 ```
-═══════════════════════════════════════════
-  DOCUMENTATION MAINTENANCE COMPLETE
-═══════════════════════════════════════════
+  ✓ Change detection · {N} files
+  ✓ Documentation updates
+  ──────────────────────────────────────────────────
 
-  Changed files detected:   {N}
-  Directories affected:     {N}
-  AGENTS.md updated:        {N}
-  AGENTS.md created:        {N}
-  Directories still missing AGENTS.md: {N}
+  Docs Maintenance Complete
 
-  Updated files:
-    {list of AGENTS.md files that were modified}
-
-  Created files:
-    {list of new AGENTS.md + CLAUDE.md files}
-
-  Missing (consider running /deep-review:full-review):
-    {list of directories that should have AGENTS.md}
-═══════════════════════════════════════════
+  {N} updated  ·  {N} created  ·  {N} missing
 ```
+
+If any files were updated, print:
+```
+  ── Updated ───────────────────────────────────────
+
+  → {path/to/AGENTS.md}
+  → {path/to/AGENTS.md}
+```
+
+If any files were created, print:
+```
+  ── Created ───────────────────────────────────────
+
+  → {path/to/AGENTS.md}
+  → {path/to/CLAUDE.md}
+```
+
+If any directories are missing AGENTS.md, print:
+```
+  ── Missing ───────────────────────────────────────
+
+  {dir/} — {N} code files, no AGENTS.md
+```
+
+Print next steps:
+```
+  ── Next ──────────────────────────────────────────
+
+  1. Run /deep-review:full-review for missing directories
+  2. Review updated AGENTS.md files for accuracy
+```
+
+Do NOT follow the summary with any prose paragraph.

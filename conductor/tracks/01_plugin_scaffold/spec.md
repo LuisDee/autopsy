@@ -6,7 +6,7 @@
 ## Interfaces
 
 ### Owns
-- Plugin directory structure (`deep-review/` with `commands/`, `agents/`, `skills/`, `.claude-plugin/`)
+- Plugin directory structure (`autopsy/` with `commands/`, `agents/`, `skills/`, `.claude-plugin/`)
 - `plugin.json` manifest
 - `README.md` documentation
 
@@ -22,21 +22,21 @@
 
 ## Overview
 
-Create the complete directory structure, plugin manifest, placeholder files, and comprehensive README for the `deep-review` Claude Code plugin. This track establishes the skeleton that all subsequent tracks populate. The plugin name is `deep-review`, producing the `/deep-review:full-review` and `/deep-review:maintain-docs` command namespaces.
+Create the complete directory structure, plugin manifest, placeholder files, and comprehensive README for the `autopsy` Claude Code plugin. This track establishes the skeleton that all subsequent tracks populate. The plugin name is `autopsy`, producing the `/autopsy:full-review` and `/autopsy:maintain-docs` command namespaces.
 
 ## Functional Requirements
 
 ### FR-1: Plugin Manifest
 - Create `.claude-plugin/plugin.json` with:
-  - `name`: `"deep-review"`
+  - `name`: `"autopsy"`
   - `version`: `"1.0.0"`
-  - `description`: Brief description mentioning `/deep-review:full-review` for multi-agent code review and `/deep-review:maintain-docs` for documentation maintenance
+  - `description`: Brief description mentioning `/autopsy:full-review` for multi-agent code review and `/autopsy:maintain-docs` for documentation maintenance
   - Component paths listing all commands, agents, and skills
 
 ### FR-2: Directory Structure
-Create the following directory tree inside `deep-review/`:
+Create the following directory tree inside `autopsy/`:
 ```
-deep-review/
+autopsy/
 ├── .claude-plugin/
 │   └── plugin.json
 ├── commands/
@@ -73,7 +73,7 @@ Each placeholder `.md` file must contain:
 `README.md` must include:
 1. **What the plugin does** — one paragraph summary
 2. **Installation** — `claude plugin install` instructions
-3. **Commands** — `/deep-review:full-review` and `/deep-review:maintain-docs` with descriptions
+3. **Commands** — `/autopsy:full-review` and `/autopsy:maintain-docs` with descriptions
 4. **What gets generated** — `REVIEW_REPORT.md`, `AGENTS.md` files, companion `CLAUDE.md` files
 5. **Architecture overview** — sub-agent diagram showing the 3-phase flow (Discovery → Review → Synthesis)
 6. **Recommended configuration** — `MAX_THINKING_TOKENS=63999`, `/effort max`
@@ -86,15 +86,15 @@ Each placeholder `.md` file must contain:
 - `plugin.json` must be valid JSON (parseable by `python3 -c "import json; json.load(open(...))"`)
 - All placeholder files must have valid YAML frontmatter
 - README must be standard GitHub-flavored Markdown
-- No files outside the `deep-review/` directory
+- No files outside the `autopsy/` directory
 
 ## Acceptance Criteria
 
-- [ ] `find deep-review/ -type f | sort` shows all 12 files
+- [ ] `find autopsy/ -type f | sort` shows all 12 files
 - [ ] `plugin.json` passes JSON validation
 - [ ] All placeholder files have valid YAML frontmatter with name and description
 - [ ] README contains all 9 required sections
-- [ ] Plugin loads without errors: `claude --plugin-dir ./deep-review`
+- [ ] Plugin loads without errors: `claude --plugin-dir ./autopsy`
 
 ## Out of Scope
 

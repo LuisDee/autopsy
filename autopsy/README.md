@@ -1,24 +1,24 @@
-# deep-review
+# autopsy
 
 ## What It Does
 
-A Claude Code plugin that performs exhaustive, multi-agent code review and architecture assessment of your entire repository with a single command. You run `/deep-review:full-review` and walk away. When it finishes, you have two complementary reports: `REVIEW_REPORT.md` with every bug, security vulnerability, error handling gap, and performance issue found, and `ARCHITECTURE_REPORT.md` with a design-level assessment of your system's components, tooling choices, quality attributes, and improvement recommendations — plus `AGENTS.md` files in every significant directory that make all future Claude Code sessions faster and more context-aware.
+A Claude Code plugin that performs exhaustive, multi-agent code review and architecture assessment of your entire repository with a single command. You run `/autopsy:full-review` and walk away. When it finishes, you have two complementary reports: `REVIEW_REPORT.md` with every bug, security vulnerability, error handling gap, and performance issue found, and `ARCHITECTURE_REPORT.md` with a design-level assessment of your system's components, tooling choices, quality attributes, and improvement recommendations — plus `AGENTS.md` files in every significant directory that make all future Claude Code sessions faster and more context-aware.
 
 ## Installation
 
 ```bash
-claude plugin install deep-review
+claude plugin install autopsy
 ```
 
 Or install from a local directory during development:
 
 ```bash
-claude --plugin-dir ./deep-review
+claude --plugin-dir ./autopsy
 ```
 
 ## Commands
 
-### `/deep-review:full-review`
+### `/autopsy:full-review`
 
 Launches the full autonomous review pipeline. Discovers your repo structure, dispatches 5 specialized code review agents in parallel across file batches while simultaneously running architecture assessment agents (architect + researcher), then synthesizes all findings into two complementary reports.
 
@@ -26,18 +26,18 @@ Launches the full autonomous review pipeline. Discovers your repo structure, dis
 
 **Usage:**
 ```
-/deep-review:full-review
+/autopsy:full-review
 ```
 
 No arguments needed. The plugin auto-detects repo size and adjusts batch sizing accordingly.
 
-### `/deep-review:maintain-docs`
+### `/autopsy:maintain-docs`
 
 Detects which files changed since the last review (via `git diff`) and incrementally updates the relevant `AGENTS.md` files. Use this after significant code changes to keep documentation current without running a full review.
 
 **Usage:**
 ```
-/deep-review:maintain-docs
+/autopsy:maintain-docs
 ```
 
 ## What Gets Generated
@@ -48,33 +48,33 @@ Detects which files changed since the last review (via `git diff`) and increment
 | `ARCHITECTURE_REPORT.md` | Repo root | Design-level assessment: components, tooling, quality attributes, recommendations |
 | `AGENTS.md` | Every significant directory | Persistent documentation: module purpose, key files, boundaries, gotchas |
 | `CLAUDE.md` | Alongside each `AGENTS.md` | Companion file with `@AGENTS.md` reference for Claude Code compatibility |
-| `.deep-review/` | Repo root | Working directory with discovery data, batch results, and progress state (can be gitignored) |
+| `.autopsy/` | Repo root | Working directory with discovery data, batch results, and progress state (can be gitignored) |
 
 ## Architecture Overview
 
-The plugin uses a 3-phase orchestrator-worker architecture. The orchestrator command stays lightweight — it never reads file contents directly. All heavy analysis happens in sub-agents with fresh context windows, coordinated via disk (the `.deep-review/` directory).
+The plugin uses a 3-phase orchestrator-worker architecture. The orchestrator command stays lightweight — it never reads file contents directly. All heavy analysis happens in sub-agents with fresh context windows, coordinated via disk (the `.autopsy/` directory).
 
 ```
-/deep-review:full-review (orchestrator)
+/autopsy:full-review (orchestrator)
   │
   │  PHASE 1: DISCOVERY
   ├──► discovery agent
   │      Maps repo structure, generates AGENTS.md files,
   │      produces batch plan for review agents
-  │      Writes: .deep-review/discovery.md, batch-plan.md
+  │      Writes: .autopsy/discovery.md, batch-plan.md
   │
   │  PHASE 2: REVIEW + ARCHITECTURE (parallel)
   │
   │  Phase 2B — Code Review (per batch, 5 agents in parallel)
-  ├──► bug-hunter ──────────► .deep-review/batch-N/bugs.md
-  ├──► security-auditor ────► .deep-review/batch-N/security.md
-  ├──► error-inspector ─────► .deep-review/batch-N/errors.md
-  ├──► performance-detector ► .deep-review/batch-N/performance.md
-  ├──► stack-reviewer ──────► .deep-review/batch-N/stack.md
+  ├──► bug-hunter ──────────► .autopsy/batch-N/bugs.md
+  ├──► security-auditor ────► .autopsy/batch-N/security.md
+  ├──► error-inspector ─────► .autopsy/batch-N/errors.md
+  ├──► performance-detector ► .autopsy/batch-N/performance.md
+  ├──► stack-reviewer ──────► .autopsy/batch-N/stack.md
   │
   │  Phase 2A — Architecture (runs alongside first batch)
-  ├──► architect ───────────► .deep-review/architecture-analysis.md
-  ├──► researcher ──────────► .deep-review/best-practices-research.md
+  ├──► architect ───────────► .autopsy/architecture-analysis.md
+  ├──► researcher ──────────► .autopsy/best-practices-research.md
   │
   │  PHASE 3: SYNTHESIS (both in parallel)
   ├──► synthesizer ─────────► REVIEW_REPORT.md
@@ -87,7 +87,7 @@ The plugin uses a 3-phase orchestrator-worker architecture. The orchestrator com
 - Architecture agents (architect + researcher) run alongside the first code review batch for maximum parallelism
 - Architecture assessment failure never blocks the code review pipeline
 - Disk-based coordination keeps the orchestrator context light
-- Progress is tracked in `.deep-review/state.json` and `.deep-review/progress.md` for compaction safety
+- Progress is tracked in `.autopsy/state.json` and `.autopsy/progress.md` for compaction safety
 
 ## Two Complementary Reports
 
@@ -131,7 +131,7 @@ Costs scale linearly with file count. Each review batch spawns 5 parallel agents
 
 ## Companion Plugin Recommendations
 
-deep-review works standalone with no external dependencies. The following tools are **optional** and may provide marginal benefit in specific scenarios:
+autopsy works standalone with no external dependencies. The following tools are **optional** and may provide marginal benefit in specific scenarios:
 
 - **ast-grep** — Structural code search. Limited value since review agents already read every file completely. May help for very large repos where you want to pre-filter.
 - **GrepAI** — Semantic search via Ollama. Requires local Ollama setup. Sub-agents cannot access MCP tools when running in background, so this is only useful in the orchestrator context.
@@ -140,14 +140,14 @@ deep-review works standalone with no external dependencies. The following tools 
 
 ## How Documentation Compounds
 
-The `AGENTS.md` files generated by deep-review are not just review artifacts — they are persistent, cross-LLM documentation that compounds in value:
+The `AGENTS.md` files generated by autopsy are not just review artifacts — they are persistent, cross-LLM documentation that compounds in value:
 
-**First run:** deep-review maps your entire repo and writes `AGENTS.md` in every significant directory, documenting module purpose, key files, architectural boundaries, common patterns, and gotchas.
+**First run:** autopsy maps your entire repo and writes `AGENTS.md` in every significant directory, documenting module purpose, key files, architectural boundaries, common patterns, and gotchas.
 
 **Every subsequent Claude Code session:** Claude reads these files automatically (via companion `CLAUDE.md` with `@AGENTS.md`), gaining instant context about your codebase without re-reading source files. This means faster responses, fewer hallucinations, and better adherence to your project's patterns.
 
-**After code changes:** Run `/deep-review:maintain-docs` to incrementally update documentation for changed modules. The cost is minimal compared to a full review.
+**After code changes:** Run `/autopsy:maintain-docs` to incrementally update documentation for changed modules. The cost is minimal compared to a full review.
 
 **Cross-LLM compatibility:** `AGENTS.md` is an open standard (Linux Foundation) supported by Claude Code, Cursor, GitHub Copilot, Codex CLI, and Gemini CLI. Your documentation investment isn't locked to a single tool.
 
-Over time, the documentation becomes the most valuable output of deep-review — a living, machine-readable map of your codebase that every AI coding assistant can leverage.
+Over time, the documentation becomes the most valuable output of autopsy — a living, machine-readable map of your codebase that every AI coding assistant can leverage.

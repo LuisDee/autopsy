@@ -3,8 +3,8 @@
 ## Phase 1: Output Rendering Guide (Reference Document)
 
 - [x] Task 1.1: Create output rendering guide reference document
-  - [ ] Create `deep-review/references/` directory
-  - [ ] Write `deep-review/references/output-rendering.md` based on full-output-spec.md
+  - [ ] Create `autopsy/references/` directory
+  - [ ] Write `autopsy/references/output-rendering.md` based on full-output-spec.md
   - [ ] Adapt content for LLM instruction context (DD-1: spinner as preference hint, DD-5: named colors)
   - [ ] Include all 4 output states with exact template text
   - [ ] Include symbol set, color palette (named), anti-patterns list
@@ -34,7 +34,7 @@
 
 - [x] Task 2.2: Replace final summary output in full-review.md (Step 10)
   - [ ] Remove double-line box (═══) entirely
-  - [ ] Replace with: three collapsed ✓ lines + thin divider + "Deep Review Complete — {time} total"
+  - [ ] Replace with: three collapsed ✓ lines + thin divider + "Autopsy Complete — {time} total"
   - [ ] Add severity counts line: `{N} critical · {N} high · {N} medium · {N} low     {total} issues`
   - [ ] Add named color instructions for severity counts (red, orange, yellow, dim)
   - [ ] Remove emoji severity markers (🔴🟠🟡🔵) from all terminal output
@@ -92,8 +92,8 @@
   - [ ] Verify agent definitions, batch findings, and REVIEW_REPORT.md are NOT modified (NFR-1, NFR-3)
 
 - [x] Task 4.2: Verify plugin structure and loading
-  - [ ] Run `find deep-review/ -type f | sort` to verify file structure
-  - [ ] Validate plugin.json: `python3 -c "import json; json.load(open('deep-review/.claude-plugin/plugin.json'))"`
+  - [ ] Run `find autopsy/ -type f | sort` to verify file structure
+  - [ ] Validate plugin.json: `python3 -c "import json; json.load(open('autopsy/.claude-plugin/plugin.json'))"`
   - [ ] Verify references/ directory is properly placed within plugin
 
 - [x] Task: Conductor - User Manual Verification 'Phase 4: Validation' (Protocol in workflow.md)

@@ -11,3 +11,4 @@
 | 07_output_rendering | Output Rendering Overhaul | 4 | L | complete | 05_orchestrator_command, 06_secondary_commands, 03_review_agents, 04_synthesizer_agent |
 | 08_architecture_agents | Architecture Agents | 5 | L | complete | 01_plugin_scaffold |
 | 09_architecture_orchestration | Architecture Orchestration | 5 | M | complete | 08_architecture_agents, 05_orchestrator_command, 07_output_rendering |
+| 10_rebrand_autopsy | Rebrand to Autopsy | 6 | S | complete | -- |

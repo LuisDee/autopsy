@@ -9,15 +9,15 @@
 ## Interfaces
 
 ### Owns
-- `.deep-review/batch-{N}/bugs.md` (bug-hunter findings)
-- `.deep-review/batch-{N}/security.md` (security-auditor findings)
-- `.deep-review/batch-{N}/errors.md` (error-inspector findings)
-- `.deep-review/batch-{N}/performance.md` (performance-detector findings)
-- `.deep-review/batch-{N}/stack.md` (stack-reviewer findings)
+- `.autopsy/batch-{N}/bugs.md` (bug-hunter findings)
+- `.autopsy/batch-{N}/security.md` (security-auditor findings)
+- `.autopsy/batch-{N}/errors.md` (error-inspector findings)
+- `.autopsy/batch-{N}/performance.md` (performance-detector findings)
+- `.autopsy/batch-{N}/stack.md` (stack-reviewer findings)
 
 ### Consumes
 - `{dir}/AGENTS.md` (from Track 02 — read for module context before reviewing)
-- `.deep-review/discovery.md` (from Track 02 — repo profile for stack context)
+- `.autopsy/discovery.md` (from Track 02 — repo profile for stack context)
 
 ## Dependencies
 - Track 01_plugin_scaffold: `agents/` directory must exist

@@ -4,22 +4,22 @@
 - Self-Review Step (v1): Every agent must verify its own output before completing. The three new architecture agents must include the same self-review checklist pattern used by existing review agents.
 - Few-Shot Examples (v1): Every agent definition must include 2-3 concrete output examples in the exact output format. Architecture agents need architecture-specific examples (not code-level finding examples).
 - Thoroughness Rules (v1): Every agent must read full file contents, provide exact paths and references, never skim. The architect agent applies this to strategic file reading (entry points, configs, core modules) rather than exhaustive line-by-line review.
-- Compaction-Safe State Management (v1): The architecture-synthesizer must write ARCHITECTURE_REPORT.md to disk as its final action. Intermediate files (.deep-review/architecture-analysis.md, .deep-review/best-practices-research.md) must be written to disk before the synthesizer is launched.
+- Compaction-Safe State Management (v1): The architecture-synthesizer must write ARCHITECTURE_REPORT.md to disk as its final action. Intermediate files (.autopsy/architecture-analysis.md, .autopsy/best-practices-research.md) must be written to disk before the synthesizer is launched.
 - Error Recovery (v1): If the architect or researcher agent fails, the orchestrator (Track 09) must log the failure and continue. The architecture-synthesizer must handle missing inputs gracefully (e.g., produce a partial report if only one input is available).
 - Agent Output Format (v1): The existing finding format applies to code-level review agents. Architecture agents need their own output format specification -- this is a design decision for this track.
 
 ## Interfaces
 
 ### Owns
-- `.deep-review/architecture-analysis.md` -- architect agent output (component map, interaction analysis, tooling evaluation, quality attributes, design gaps)
-- `.deep-review/best-practices-research.md` -- researcher agent output (per-technology research, architectural pattern research, alternative tools research)
+- `.autopsy/architecture-analysis.md` -- architect agent output (component map, interaction analysis, tooling evaluation, quality attributes, design gaps)
+- `.autopsy/best-practices-research.md` -- researcher agent output (per-technology research, architectural pattern research, alternative tools research)
 - `ARCHITECTURE_REPORT.md` -- architecture-synthesizer final report (7 sections + appendices)
 
 ### Consumes
-- `.deep-review/discovery.md` (Track 02 -- repo profile, stats, module summary, risk areas)
+- `.autopsy/discovery.md` (Track 02 -- repo profile, stats, module summary, risk areas)
 - `{dir}/AGENTS.md` (Track 02 -- module-level documentation for architectural context)
 - `{dir}/CLAUDE.md` (Track 02 -- project-level documentation)
-- `.deep-review/batch-{N}/*.md` (Track 03 -- code review findings as optional supporting evidence)
+- `.autopsy/batch-{N}/*.md` (Track 03 -- code review findings as optional supporting evidence)
 
 ## Dependencies
 - Track 01_plugin_scaffold: COMPLETE. Provides `agents/` directory structure and plugin.json manifest.
@@ -30,32 +30,32 @@
 
 ## What This Track Delivers
 
-Three new agent definition markdown files that add an architecture assessment capability to the deep-review plugin. Unlike the existing review agents (which find code-level bugs, security issues, and performance problems), these agents analyze the system at a design level -- evaluating component structure, technology choices, interaction patterns, and quality attribute tradeoffs. The architect agent performs ATAM-inspired analysis of the codebase; the researcher agent looks up official documentation and best practices for every technology in the stack; and the architecture-synthesizer combines both outputs into a structured ARCHITECTURE_REPORT.md that lives alongside the existing REVIEW_REPORT.md. This creates a clear separation: REVIEW_REPORT.md covers code-level findings, ARCHITECTURE_REPORT.md covers design-level assessment.
+Three new agent definition markdown files that add an architecture assessment capability to the autopsy plugin. Unlike the existing review agents (which find code-level bugs, security issues, and performance problems), these agents analyze the system at a design level -- evaluating component structure, technology choices, interaction patterns, and quality attribute tradeoffs. The architect agent performs ATAM-inspired analysis of the codebase; the researcher agent looks up official documentation and best practices for every technology in the stack; and the architecture-synthesizer combines both outputs into a structured ARCHITECTURE_REPORT.md that lives alongside the existing REVIEW_REPORT.md. This creates a clear separation: REVIEW_REPORT.md covers code-level findings, ARCHITECTURE_REPORT.md covers design-level assessment.
 
 ## Scope
 
 ### IN
-- `deep-review/agents/architect.md` -- ATAM-inspired 6-step analysis agent definition:
+- `autopsy/agents/architect.md` -- ATAM-inspired 6-step analysis agent definition:
   1. Infer system goal from codebase structure and documentation
   2. Decompose components (modules, services, layers, boundaries)
   3. Analyze interactions (data flow, control flow, coupling patterns)
   4. Evaluate tooling choices (language, framework, libraries, infrastructure)
   5. Quality attribute tradeoff analysis (scalability, maintainability, security, performance, testability)
   6. Identify design gaps (missing abstractions, tight coupling, unclear boundaries)
-- `deep-review/agents/researcher.md` -- technology research agent definition:
+- `autopsy/agents/researcher.md` -- technology research agent definition:
   - Per-technology official documentation lookup
   - Architectural pattern research (does the codebase follow recognized patterns?)
   - Alternative tools analysis (what else could be used, and why the current choice may or may not be optimal)
   - Interaction pattern research (how the chosen technologies are intended to work together)
-- `deep-review/agents/architecture-synthesizer.md` -- cross-referencing and report generation:
+- `autopsy/agents/architecture-synthesizer.md` -- cross-referencing and report generation:
   - Reads architect + researcher outputs from disk
   - Cross-references design analysis with best-practice research
   - Generates structured ARCHITECTURE_REPORT.md with sections and appendices
   - Produces design-level recommendations (not code-level fixes)
 - YAML frontmatter for each agent (name, description, tools, model)
 - Self-review verification step in each agent
-- Output format specification for `.deep-review/architecture-analysis.md`
-- Output format specification for `.deep-review/best-practices-research.md`
+- Output format specification for `.autopsy/architecture-analysis.md`
+- Output format specification for `.autopsy/best-practices-research.md`
 - Output format specification for `ARCHITECTURE_REPORT.md`
 - Few-shot examples (2-3) in each agent definition
 
@@ -100,7 +100,7 @@ These should be resolved with the developer during spec generation:
    - Option B: Exhaustive reading ensures nothing is missed but may overwhelm with implementation details that obscure architecture
    - Trade-off: architectural focus vs completeness
 
-6. **Intermediate file output format:** Should `.deep-review/architecture-analysis.md` and `.deep-review/best-practices-research.md` use strictly structured markdown (with defined section headers the synthesizer can parse) or freeform analysis?
+6. **Intermediate file output format:** Should `.autopsy/architecture-analysis.md` and `.autopsy/best-practices-research.md` use strictly structured markdown (with defined section headers the synthesizer can parse) or freeform analysis?
    - Option A: Strict structure with mandatory sections enables reliable parsing by the synthesizer
    - Option B: Freeform analysis allows richer, more nuanced observations but makes synthesis harder
    - Trade-off: parseability vs analytical depth
@@ -114,7 +114,7 @@ These should be resolved with the developer during spec generation:
 ## Architectural Notes
 
 - The architect and researcher agents are designed to run in PARALLEL. They must be completely independent -- no shared state, no reading each other's output. The orchestrator (Track 09) launches both simultaneously and waits for both to complete before launching the synthesizer.
-- The architecture-synthesizer runs AFTER both the architect and researcher complete. It reads their outputs from `.deep-review/architecture-analysis.md` and `.deep-review/best-practices-research.md`. This is the same sequential-after-parallel pattern used by the existing synthesizer (Track 04) with review agents.
+- The architecture-synthesizer runs AFTER both the architect and researcher complete. It reads their outputs from `.autopsy/architecture-analysis.md` and `.autopsy/best-practices-research.md`. This is the same sequential-after-parallel pattern used by the existing synthesizer (Track 04) with review agents.
 - MCP tools are NOT available in background sub-agents (known platform limitation, see MEMORY.md). If the researcher needs Context7 MCP, it must run in foreground -- which means it runs sequentially with the architect, not in parallel. This is the core tension in DD-3.
 - These agents follow the same markdown definition pattern as existing agents (`bug-hunter.md`, `security-auditor.md`, etc.): YAML frontmatter, structured instructions, checklists, few-shot examples, and a self-review step. Study the existing agents for the exact pattern.
 - ARCHITECTURE_REPORT.md must be clearly distinct from REVIEW_REPORT.md. The architecture report covers design-level assessment (component structure, technology choices, quality attributes, design gaps). The review report covers code-level findings (bugs, security, errors, performance). They should cross-reference each other but not duplicate content.
@@ -126,14 +126,14 @@ These should be resolved with the developer during spec generation:
 
 - **Framework:** None (plugin is Markdown-based, no executable code)
 - **Validation approach:**
-  - Load plugin with `claude --plugin-dir ./deep-review` and verify all 3 new agent definitions are recognized
+  - Load plugin with `claude --plugin-dir ./autopsy` and verify all 3 new agent definitions are recognized
   - Verify YAML frontmatter parses correctly (name, description, tools fields present)
   - Verify each agent definition includes a self-review step
   - Verify each agent definition includes 2-3 few-shot examples
   - Verify output format specifications are present and parseable
 - **Manual integration test:**
-  - Run the architect agent against a sample repository and verify `.deep-review/architecture-analysis.md` is produced with expected sections
-  - Run the researcher agent and verify `.deep-review/best-practices-research.md` is produced
+  - Run the architect agent against a sample repository and verify `.autopsy/architecture-analysis.md` is produced with expected sections
+  - Run the researcher agent and verify `.autopsy/best-practices-research.md` is produced
   - Run the architecture-synthesizer and verify `ARCHITECTURE_REPORT.md` is produced with expected structure
 - **Prerequisites:** Track 01 must be complete (agents/ directory must exist)
 - **Quality threshold:** All agent definitions must follow the established pattern (YAML frontmatter, checklists, few-shot examples, self-review step). Advisory coverage target: N/A (no executable code to cover).

@@ -13,12 +13,12 @@
 - Updated root `AGENTS.md` with architectural insights and known issues
 
 ### Consumes
-- `.deep-review/batch-{N}/bugs.md` (from Track 03)
-- `.deep-review/batch-{N}/security.md` (from Track 03)
-- `.deep-review/batch-{N}/errors.md` (from Track 03)
-- `.deep-review/batch-{N}/performance.md` (from Track 03)
-- `.deep-review/batch-{N}/stack.md` (from Track 03)
-- `.deep-review/discovery.md` (from Track 02 — repo profile for context)
+- `.autopsy/batch-{N}/bugs.md` (from Track 03)
+- `.autopsy/batch-{N}/security.md` (from Track 03)
+- `.autopsy/batch-{N}/errors.md` (from Track 03)
+- `.autopsy/batch-{N}/performance.md` (from Track 03)
+- `.autopsy/batch-{N}/stack.md` (from Track 03)
+- `.autopsy/discovery.md` (from Track 02 — repo profile for context)
 
 ## Dependencies
 - Track 01_plugin_scaffold: `agents/` directory must exist
@@ -62,7 +62,7 @@ These should be resolved with the developer during spec generation:
 ## Architectural Notes
 
 - The synthesizer runs in FOREGROUND (blocking) — the orchestrator waits for it to complete
-- It must read ALL `.md` files in ALL `.deep-review/batch-*/` directories — this could be significant context for large repos
+- It must read ALL `.md` files in ALL `.autopsy/batch-*/` directories — this could be significant context for large repos
 - The dependency audit commands (`pip audit`, `npm audit`, etc.) may not be available in all environments — the agent should handle missing tools gracefully
 - The secrets scan pattern must avoid flagging test fixtures, documentation examples, and environment variable definitions
 - Multi-agent consensus (3+ agents flagging same issue) should elevate confidence, not severity — severity is based on impact

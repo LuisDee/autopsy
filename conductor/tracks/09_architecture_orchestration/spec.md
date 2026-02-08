@@ -18,10 +18,10 @@
 - `agents/architect.md` (from Track 08 — agent definition launched by orchestrator)
 - `agents/researcher.md` (from Track 08 — agent definition launched by orchestrator)
 - `agents/architecture-synthesizer.md` (from Track 08 — agent definition launched by orchestrator)
-- `.deep-review/discovery.md` (from Track 02 — repo map passed to architecture agents)
-- `.deep-review/architecture-analysis.md` (from Track 08 — output verified before launching architecture-synthesizer)
-- `.deep-review/best-practices-research.md` (from Track 08 — output verified before launching architecture-synthesizer)
-- `.deep-review/ARCHITECTURE_REPORT.md` or `ARCHITECTURE_REPORT.md` (from Track 08 — verified after architecture-synthesizer completes)
+- `.autopsy/discovery.md` (from Track 02 — repo map passed to architecture agents)
+- `.autopsy/architecture-analysis.md` (from Track 08 — output verified before launching architecture-synthesizer)
+- `.autopsy/best-practices-research.md` (from Track 08 — output verified before launching architecture-synthesizer)
+- `.autopsy/ARCHITECTURE_REPORT.md` or `ARCHITECTURE_REPORT.md` (from Track 08 — verified after architecture-synthesizer completes)
 - `state.json` (from Track 05 — extended with architecture phase tracking)
 - `progress.md` (from Track 05 — extended with architecture status)
 - `references/output-rendering.md` (from Track 07 — governs all terminal output)
@@ -57,8 +57,8 @@
 
 **Behavior:**
 1. After discovery completes and batch plan is read, launch architect + researcher agents alongside the first batch's 5 review agents — all 7 in a single message with 7 Task calls.
-2. Architect agent prompt: tell it to read `.deep-review/discovery.md` for repo context, then follow its agent definition (`agents/architect.md`), and write output to `.deep-review/architecture-analysis.md`.
-3. Researcher agent prompt: tell it to read `.deep-review/discovery.md` for technology identification, then follow its agent definition (`agents/researcher.md`), and write output to `.deep-review/best-practices-research.md`.
+2. Architect agent prompt: tell it to read `.autopsy/discovery.md` for repo context, then follow its agent definition (`agents/architect.md`), and write output to `.autopsy/architecture-analysis.md`.
+3. Researcher agent prompt: tell it to read `.autopsy/discovery.md` for technology identification, then follow its agent definition (`agents/researcher.md`), and write output to `.autopsy/best-practices-research.md`.
 4. After the first batch (all 7 agents) returns, verify architecture output files exist alongside the normal batch output verification.
 5. If architecture output files are missing, log to `state.json` under `agent_failures`, retry once. If still missing after retry, continue — the architecture-synthesizer handles missing inputs gracefully.
 6. For subsequent batches (batch 2+), only launch the 5 review agents as normal.
@@ -104,7 +104,7 @@
 1. Phase 3 waits for ALL of Phase 2 to complete (all code review batches AND architecture agents).
 2. Launch both synthesizers in a single message as 2 parallel foreground Task calls:
    - Existing code review synthesizer (unchanged prompt from current Step 8)
-   - Architecture-synthesizer: tell it to follow its agent definition (`agents/architecture-synthesizer.md`), read all inputs from `.deep-review/`, and write `ARCHITECTURE_REPORT.md` to the repo root
+   - Architecture-synthesizer: tell it to follow its agent definition (`agents/architecture-synthesizer.md`), read all inputs from `.autopsy/`, and write `ARCHITECTURE_REPORT.md` to the repo root
 3. If `phase_2a_status` is "failed", still launch architecture-synthesizer but prepend to its prompt: "Some architecture analysis inputs may be missing. Follow your missing-input handling logic to produce a partial report."
 4. After both synthesizers return, verify both output files exist (`REVIEW_REPORT.md` and `ARCHITECTURE_REPORT.md`).
 5. If `ARCHITECTURE_REPORT.md` is missing, retry architecture-synthesizer once. If still missing, create a minimal fallback:
@@ -118,7 +118,7 @@
    - best-practices-research.md: {exists/missing}
 
    ## Raw Data
-   Available inputs are in `.deep-review/`. Run a full review again to regenerate.
+   Available inputs are in `.autopsy/`. Run a full review again to regenerate.
    ```
 
 **State updates:**
@@ -150,7 +150,7 @@
    → REVIEW_REPORT.md         full code review findings
    → ARCHITECTURE_REPORT.md   design assessment + recommendations
    → AGENTS.md (×{N})         module documentation
-   → .deep-review/            raw findings + state
+   → .autopsy/            raw findings + state
    ```
 3. If `ARCHITECTURE_REPORT.md` doesn't exist (architecture failed), omit the line.
 4. Updated Next steps:
@@ -160,7 +160,7 @@
    1. Fix critical issues first
    2. Read REVIEW_REPORT.md for code-level details
    3. Read ARCHITECTURE_REPORT.md for design-level assessment
-   4. Run /deep-review:maintain-docs after changes
+   4. Run /autopsy:maintain-docs after changes
    ```
 5. If architecture failed, replace step 3 with: "Re-run full review to regenerate architecture assessment"
 
@@ -227,11 +227,11 @@
 
 ### FR-8: Update AGENTS.md files
 
-**What:** Update AGENTS.md files in `deep-review/` and `deep-review/commands/` to reflect the new architecture orchestration.
+**What:** Update AGENTS.md files in `autopsy/` and `autopsy/commands/` to reflect the new architecture orchestration.
 
 **Changes:**
-- `deep-review/AGENTS.md`: Update agent count (7→10), add architecture phases to data flow, mention ARCHITECTURE_REPORT.md
-- `deep-review/commands/AGENTS.md`: Update full-review.md description to mention 4 phases (Discovery, Review+Architecture, Synthesis), update data flow
+- `autopsy/AGENTS.md`: Update agent count (7→10), add architecture phases to data flow, mention ARCHITECTURE_REPORT.md
+- `autopsy/commands/AGENTS.md`: Update full-review.md description to mention 4 phases (Discovery, Review+Architecture, Synthesis), update data flow
 
 ---
 
@@ -264,7 +264,7 @@ arch: complete|failed|running
 
 ## Acceptance Criteria
 
-1. Running `/deep-review:full-review` launches architect + researcher agents alongside the first batch's review agents (7 parallel foreground tasks)
+1. Running `/autopsy:full-review` launches architect + researcher agents alongside the first batch's review agents (7 parallel foreground tasks)
 2. Phase 3 launches both synthesizers in parallel after all of Phase 2 completes
 3. Final summary includes ARCHITECTURE_REPORT.md in the Reports section
 4. Architecture agent failure does NOT block code review completion

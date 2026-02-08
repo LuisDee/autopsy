@@ -9,7 +9,7 @@
 
 Deep-review is a Claude Code plugin that orchestrates 7 specialized sub-agents to perform exhaustive code review and generate living documentation. It is not a traditional software application — it is a collection of Markdown files with YAML frontmatter that instruct Claude Code's runtime.
 
-The architecture follows an **Orchestrator-Worker pattern with sequential pipeline**: Phase 1 (Discovery) produces a repo map and batch plan, Phase 2 (Review) fans out to 5 parallel agents per batch, and Phase 3 (Synthesis) merges all findings into a final report. All inter-agent coordination happens via the filesystem (`.deep-review/` directory), keeping the orchestrator's context window light.
+The architecture follows an **Orchestrator-Worker pattern with sequential pipeline**: Phase 1 (Discovery) produces a repo map and batch plan, Phase 2 (Review) fans out to 5 parallel agents per batch, and Phase 3 (Synthesis) merges all findings into a final report. All inter-agent coordination happens via the filesystem (`.autopsy/` directory), keeping the orchestrator's context window light.
 
 The plugin runs entirely within the Claude Code runtime. There are no external services, databases, or APIs. The "stack" is Markdown + JSON files interpreted by Claude Code's plugin system.
 
@@ -18,12 +18,12 @@ The plugin runs entirely within the Claude Code runtime. There are no external s
 ## Component Map
 
 ```
-User runs /deep-review:full-review
+User runs /autopsy:full-review
          │
          ▼
 ┌─────────────────────────────────────────────────┐
 │  ORCHESTRATOR (commands/full-review.md)          │
-│  - Creates .deep-review/ working directory       │
+│  - Creates .autopsy/ working directory       │
 │  - Launches agents via Task tool                 │
 │  - Tracks progress via state.json + progress.md  │
 │  - Never reads source code directly              │
@@ -51,7 +51,7 @@ User runs /deep-review:full-review
                 │ batch-{N}/*.md   │
                 └──────────────────┘
 
-Coordination: .deep-review/ directory (disk-based IPC)
+Coordination: .autopsy/ directory (disk-based IPC)
 ```
 
 ---
@@ -60,7 +60,7 @@ Coordination: .deep-review/ directory (disk-based IPC)
 
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
-| Coordination layer | Filesystem (`.deep-review/`) | Sub-agents can't share memory; TaskOutput returns bloated JSONL; disk is reliable and survives compaction |
+| Coordination layer | Filesystem (`.autopsy/`) | Sub-agents can't share memory; TaskOutput returns bloated JSONL; disk is reliable and survives compaction |
 | Result retrieval | File polling (not TaskOutput) | TaskOutput returns full transcripts (issue #16789); polling for output files is more reliable |
 | Background vs foreground agents | Review agents: background; Discovery/Synthesizer: foreground | Review agents are independent and parallelizable; Discovery/Synthesizer need sequential orchestration |
 | Documentation format | `AGENTS.md` primary + `CLAUDE.md` companion | Cross-LLM compatibility; Claude Code reads `@AGENTS.md` reference in CLAUDE.md |
@@ -76,7 +76,7 @@ Coordination: .deep-review/ directory (disk-based IPC)
 - **Status:** Accepted
 - **Date:** 2026-02-07
 - **Context:** Sub-agents need to communicate results to the orchestrator. TaskOutput (the built-in mechanism) returns full JSONL transcripts that bloat the orchestrator's context. Background task notifications may not fire reliably.
-- **Decision:** All agents write results to specific file paths in `.deep-review/`. The orchestrator polls for file existence and reads only summaries. State is tracked in `state.json`.
+- **Decision:** All agents write results to specific file paths in `.autopsy/`. The orchestrator polls for file existence and reads only summaries. State is tracked in `state.json`.
 - **Consequences:** Orchestrator context stays light. Resume after compaction is possible by re-reading state files. Adds file I/O overhead but this is negligible for Markdown files.
 
 ### ADR-002: AGENTS.md as Primary Documentation Format

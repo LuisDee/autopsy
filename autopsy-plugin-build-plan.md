@@ -1,11 +1,11 @@
-# BUILD PLAN: deep-review — Claude Code Plugin
+# BUILD PLAN: autopsy — Claude Code Plugin
 
 ## What You Are Building
 
-A Claude Code plugin called `deep-review` that provides a single slash command `/deep-review:full-review` which autonomously performs an exhaustive, multi-agent code review of an entire repository and generates living documentation (CLAUDE.md files) throughout the codebase.
+A Claude Code plugin called `autopsy` that provides a single slash command `/autopsy:full-review` which autonomously performs an exhaustive, multi-agent code review of an entire repository and generates living documentation (CLAUDE.md files) throughout the codebase.
 
 It also provides:
-- `/deep-review:maintain-docs` — a command to keep documentation current after code changes
+- `/autopsy:maintain-docs` — a command to keep documentation current after code changes
 - A passive skill (`codebase-documentation`) that auto-triggers during normal work to remind Claude to read/update CLAUDE.md files
 - 7 specialized agents that the commands orchestrate
 
@@ -19,22 +19,22 @@ The user runs ONE command and walks away. When it's done they have:
 ## Architecture Overview
 
 ```
-/deep-review:full-review (command — the orchestrator)
+/autopsy:full-review (command — the orchestrator)
   │
   │  PHASE 1: DISCOVERY
   ├──► discovery agent (sub-agent, fresh context)
   │      Reads: every file in repo (via find + representative samples)
-  │      Writes: .deep-review/discovery.md (repo profile)
-  │      Writes: .deep-review/batch-plan.md (grouped file batches for review)
+  │      Writes: .autopsy/discovery.md (repo profile)
+  │      Writes: .autopsy/batch-plan.md (grouped file batches for review)
   │      Writes: CLAUDE.md files in every significant directory
   │      Writes: root CLAUDE.md (creates or updates)
   │
   │  PHASE 2: REVIEW (per batch, agents launched in parallel)
-  ├──► bug-hunter agent ────────► .deep-review/batch-{N}/bugs.md
-  ├──► security-auditor agent ──► .deep-review/batch-{N}/security.md
-  ├──► error-inspector agent ───► .deep-review/batch-{N}/errors.md
-  ├──► performance-detector ────► .deep-review/batch-{N}/performance.md
-  ├──► stack-reviewer agent ────► .deep-review/batch-{N}/stack.md
+  ├──► bug-hunter agent ────────► .autopsy/batch-{N}/bugs.md
+  ├──► security-auditor agent ──► .autopsy/batch-{N}/security.md
+  ├──► error-inspector agent ───► .autopsy/batch-{N}/errors.md
+  ├──► performance-detector ────► .autopsy/batch-{N}/performance.md
+  ├──► stack-reviewer agent ────► .autopsy/batch-{N}/stack.md
   │      (all 5 run in parallel per batch, each is a fresh context)
   │      (each reads the local CLAUDE.md first for module context)
   │      (each reads EVERY file in its assigned batch completely)
@@ -43,7 +43,7 @@ The user runs ONE command and walks away. When it's done they have:
   │
   │  PHASE 3: SYNTHESIS
   └──► synthesizer agent (sub-agent, fresh context)
-         Reads: all .deep-review/batch-*//*.md files
+         Reads: all .autopsy/batch-*//*.md files
          Performs: deduplication, cross-cutting analysis, dependency audit, testing gap analysis
          Writes: REVIEW_REPORT.md (final report in repo root)
          Updates: root CLAUDE.md with new insights
@@ -56,7 +56,7 @@ The orchestrator's context stays LIGHT. It never reads file contents directly. I
 4. Prints a summary to the user
 
 All heavy lifting happens in sub-agents with fresh context windows.
-Disk (.deep-review/ directory) is the coordination layer between phases.
+Disk (.autopsy/ directory) is the coordination layer between phases.
 
 ---
 
@@ -65,7 +65,7 @@ Disk (.deep-review/ directory) is the coordination layer between phases.
 Build this exact structure:
 
 ```
-deep-review/
+autopsy/
 ├── .claude-plugin/
 │   └── plugin.json                          ← Plugin manifest
 ├── commands/
@@ -92,23 +92,23 @@ deep-review/
 ### 1. `.claude-plugin/plugin.json`
 
 Standard Claude Code plugin manifest. Must include:
-- name: "deep-review"
+- name: "autopsy"
 - version: "1.0.0"
-- description: Mention that /deep-review:full-review runs an exhaustive multi-agent codebase review and generates living documentation. Mention /deep-review:maintain-docs keeps docs current.
+- description: Mention that /autopsy:full-review runs an exhaustive multi-agent codebase review and generates living documentation. Mention /autopsy:maintain-docs keeps docs current.
 - List all commands, agents, and skills by their file paths
 
 ---
 
 ### 2. `commands/full-review.md` — THE MAIN ORCHESTRATOR
 
-This is the most important file. It's the brains of the operation. When the user runs `/deep-review:full-review`, this command executes.
+This is the most important file. It's the brains of the operation. When the user runs `/autopsy:full-review`, this command executes.
 
 The command must instruct Claude to:
 
 #### Setup
 - Run `/effort max`
-- Create `.deep-review/` working directory in the repo root
-- Add `.deep-review/` to `.gitignore` if not already there (these are temp working files, not permanent)
+- Create `.autopsy/` working directory in the repo root
+- Add `.autopsy/` to `.gitignore` if not already there (these are temp working files, not permanent)
 - Note start time for duration tracking
 
 #### Phase 1: Discovery
@@ -116,17 +116,17 @@ The command must instruct Claude to:
 - The discovery agent prompt must include:
   - "You are the discovery agent for a deep code review. Your job is to map the entire repository, understand every module, create CLAUDE.md documentation files, and produce a batch plan for the review phase."
   - "Follow the instructions in your agent definition exactly."
-  - "Write your repo profile to `.deep-review/discovery.md`"
-  - "Write the batch plan to `.deep-review/batch-plan.md`"
+  - "Write your repo profile to `.autopsy/discovery.md`"
+  - "Write the batch plan to `.autopsy/batch-plan.md`"
   - "Create CLAUDE.md files in every significant directory"
   - "Create or update the root CLAUDE.md"
-- After the discovery agent completes, the orchestrator reads `.deep-review/batch-plan.md` to learn how many batches there are and what directories are in each batch
+- After the discovery agent completes, the orchestrator reads `.autopsy/batch-plan.md` to learn how many batches there are and what directories are in each batch
 - Print: "Phase 1 complete. Discovered {N} files across {M} modules. Created {X} CLAUDE.md files. Generated {B} review batches."
 
 #### Phase 2: Review
-- Read `.deep-review/batch-plan.md` to get the batch list
+- Read `.autopsy/batch-plan.md` to get the batch list
 - For each batch:
-  - Create `.deep-review/batch-{N}/` directory
+  - Create `.autopsy/batch-{N}/` directory
   - Launch 5 review agents IN PARALLEL as sub-agents:
     - bug-hunter
     - security-auditor
@@ -137,11 +137,11 @@ The command must instruct Claude to:
     - Which batch number and which directories/files to review (from the batch plan)
     - "Read the CLAUDE.md file in each directory you review FIRST for module context"
     - "Read the FULL contents of EVERY file listed. Do not skim or skip."
-    - "Write your findings to `.deep-review/batch-{N}/{your-name}.md`"
+    - "Write your findings to `.autopsy/batch-{N}/{your-name}.md`"
     - "If you discover undocumented gotchas, fragile areas, or missing context, update the module's CLAUDE.md file"
     - "Follow your agent definition instructions exactly"
   - After all 5 agents complete for this batch, confirm all output files exist
-  - Write a progress update to `.deep-review/progress.md`:
+  - Write a progress update to `.autopsy/progress.md`:
     - Which batches are done
     - Running count of findings by severity
   - Print: "Batch {N}/{total} complete. Found {X} issues so far."
@@ -155,14 +155,14 @@ The command must instruct Claude to:
 
 **Context pressure management:**
 - The orchestrator should NEVER read file contents itself — only batch plans and progress files
-- If context feels heavy, run /compact and re-read `.deep-review/progress.md` to resume
+- If context feels heavy, run /compact and re-read `.autopsy/progress.md` to resume
 - Write phase/batch progress to disk before each compaction risk point
-- After any compaction, read `.deep-review/progress.md` and `.deep-review/batch-plan.md` to know where to resume
+- After any compaction, read `.autopsy/progress.md` and `.autopsy/batch-plan.md` to know where to resume
 
 #### Phase 3: Synthesis
 - Launch the **synthesizer** agent as a sub-agent
 - The synthesizer prompt must include:
-  - "You are the synthesizer for a deep code review. Read all findings from `.deep-review/batch-*/` directories."
+  - "You are the synthesizer for a deep code review. Read all findings from `.autopsy/batch-*/` directories."
   - "Follow your agent definition instructions exactly."
   - "Write the final report to `REVIEW_REPORT.md` in the repo root."
   - "Update the root CLAUDE.md with architectural insights and known issues."
@@ -193,7 +193,7 @@ Print to terminal:
   Next steps:
     1. Read REVIEW_REPORT.md for prioritized findings
     2. Fix 🔴 Critical issues first
-    3. Run /deep-review:maintain-docs after making changes
+    3. Run /autopsy:maintain-docs after making changes
 ═══════════════════════════════════════════
 ```
 
@@ -201,7 +201,7 @@ Print to terminal:
 
 ### 3. `commands/maintain-docs.md` — DOCUMENTATION MAINTENANCE
 
-When the user runs `/deep-review:maintain-docs`, this command:
+When the user runs `/autopsy:maintain-docs`, this command:
 
 1. Detects what changed via git:
    ```bash
@@ -224,7 +224,7 @@ When the user runs `/deep-review:maintain-docs`, this command:
 6. Runs validation:
    ```bash
    # Find directories with 3+ code files but no CLAUDE.md
-   for dir in $(find . -type d | grep -v -E '(node_modules|\.git|__pycache__|venv|dist|build|\.cache|\.idea|\.vscode|\.deep-review)'); do
+   for dir in $(find . -type d | grep -v -E '(node_modules|\.git|__pycache__|venv|dist|build|\.cache|\.idea|\.vscode|\.autopsy)'); do
      code_files=$(find "$dir" -maxdepth 1 -type f \( -name '*.py' -o -name '*.js' -o -name '*.ts' -o -name '*.go' -o -name '*.rs' -o -name '*.java' \) | wc -l)
      has_claude=$(test -f "$dir/CLAUDE.md" && echo "yes" || echo "no")
      if [ "$code_files" -ge 3 ] && [ "$has_claude" = "no" ]; then
@@ -254,13 +254,13 @@ This agent is launched by the orchestrator in Phase 1. It runs in its own fresh 
 #### Step 1: Map the repo
 Run these commands:
 ```bash
-find . -type f | grep -v -E '(node_modules|\.git/|__pycache__|\.pyc|venv|\.venv|\.env$|dist/|build/|\.next|\.cache|coverage|\.idea|\.vscode|\.mypy_cache|\.pytest_cache|\.ruff_cache|egg-info|\.tox|target/|bin/|obj/|\.deep-review)' | sort > .deep-review/file-list.txt
+find . -type f | grep -v -E '(node_modules|\.git/|__pycache__|\.pyc|venv|\.venv|\.env$|dist/|build/|\.next|\.cache|coverage|\.idea|\.vscode|\.mypy_cache|\.pytest_cache|\.ruff_cache|egg-info|\.tox|target/|bin/|obj/|\.autopsy)' | sort > .autopsy/file-list.txt
 
-wc -l .deep-review/file-list.txt
+wc -l .autopsy/file-list.txt
 
-cat .deep-review/file-list.txt | sed 's/.*\.//' | sort | uniq -c | sort -rn | head -30
+cat .autopsy/file-list.txt | sed 's/.*\.//' | sort | uniq -c | sort -rn | head -30
 
-cat .deep-review/file-list.txt | cut -d/ -f2 | sort | uniq -c | sort -rn
+cat .autopsy/file-list.txt | cut -d/ -f2 | sort | uniq -c | sort -rn
 
 find . -type f \( -name '*.py' -o -name '*.js' -o -name '*.ts' -o -name '*.tsx' -o -name '*.jsx' -o -name '*.go' -o -name '*.rs' -o -name '*.java' -o -name '*.sql' \) | grep -v -E '(node_modules|\.git/|__pycache__|venv|dist|build)' | xargs wc -l 2>/dev/null | tail -1
 
@@ -328,7 +328,7 @@ For every directory with 3+ code files or complex logic, create a CLAUDE.md:
 Also create or update the root CLAUDE.md with the comprehensive template (project overview, architecture diagram, tech stack, directory map, conventions, key commands, important context, documentation maintenance rules).
 
 #### Step 4: Write the discovery profile
-Write `.deep-review/discovery.md`:
+Write `.autopsy/discovery.md`:
 ```markdown
 # Repository Profile
 - Name: {repo name}
@@ -354,7 +354,7 @@ Write `.deep-review/discovery.md`:
 ```
 
 #### Step 5: Generate batch plan
-Write `.deep-review/batch-plan.md`:
+Write `.autopsy/batch-plan.md`:
 ```markdown
 # Review Batch Plan
 
@@ -702,7 +702,7 @@ Stack-specific checks:
 **Instructions:**
 
 #### Step 1: Read all findings
-Read every `.md` file in every `.deep-review/batch-*/` directory.
+Read every `.md` file in every `.autopsy/batch-*/` directory.
 Compile into a single list. Deduplicate: if the same issue (same file, same line, same problem) was found by multiple agents, keep the most detailed report and note it was flagged by multiple agents.
 
 #### Step 2: Cross-cutting analysis (perform each as investigation)
@@ -751,7 +751,7 @@ Write to the repo root with this structure:
 
 **Generated:** {date}
 **Repository:** {name}
-**Review method:** Automated multi-agent deep review (deep-review plugin)
+**Review method:** Automated multi-agent deep review (autopsy plugin)
 
 ---
 
@@ -833,7 +833,7 @@ This review created/updated the following CLAUDE.md files:
 {list all CLAUDE.md file paths}
 
 These files provide persistent context for future Claude Code sessions.
-Run `/deep-review:maintain-docs` after making changes to keep them current.
+Run `/autopsy:maintain-docs` after making changes to keep them current.
 
 ---
 
@@ -875,7 +875,7 @@ When working on code in this repository:
 
 5. **Never delete information from CLAUDE.md** unless it's provably wrong. Append instead.
 
-This skill should NOT trigger during deep-review operations (when .deep-review/ directory work is happening).
+This skill should NOT trigger during autopsy operations (when .autopsy/ directory work is happening).
 
 ---
 
@@ -884,7 +884,7 @@ This skill should NOT trigger during deep-review operations (when .deep-review/ 
 Standard README with:
 - What the plugin does (1 paragraph)
 - Installation instructions
-- Commands: `/deep-review:full-review` and `/deep-review:maintain-docs`
+- Commands: `/autopsy:full-review` and `/autopsy:maintain-docs`
 - What gets generated (REVIEW_REPORT.md, CLAUDE.md files)
 - Architecture overview (the sub-agent diagram from above)
 - Recommended companion plugins (GrepAI or claude-context-local, ast-grep, pr-review-toolkit)
@@ -903,8 +903,8 @@ Standard README with:
 3. **The orchestrator is the hardest file.** It must correctly coordinate phases, launch sub-agents with the right prompts (including batch-specific context), handle context pressure, and track progress via disk. Spend extra time getting this right.
 
 4. **Test the flow mentally:**
-   - User runs `/deep-review:full-review`
-   - Orchestrator creates .deep-review/, launches discovery agent
+   - User runs `/autopsy:full-review`
+   - Orchestrator creates .autopsy/, launches discovery agent
    - Discovery agent maps repo, creates CLAUDE.md files, writes batch plan
    - Orchestrator reads batch plan, launches 5 agents per batch in parallel
    - Each agent reads files, writes findings to disk, updates CLAUDE.md files
@@ -921,8 +921,8 @@ Standard README with:
    - "Every finding must have exact file path, line number, severity, description, and fix"
    - "If you find 0 issues in a file with 100+ lines, re-read it more carefully"
 
-7. **Disk is the coordination layer.** Agents communicate through files in `.deep-review/`, not through the orchestrator's context. The orchestrator should never hold file contents — only batch plans and progress summaries.
+7. **Disk is the coordination layer.** Agents communicate through files in `.autopsy/`, not through the orchestrator's context. The orchestrator should never hold file contents — only batch plans and progress summaries.
 
 8. **The skill is passive, not active.** It triggers during normal development, not during reviews. It's a gentle reminder to read/update CLAUDE.md files. Keep it lightweight.
 
-9. **After building**, verify the directory structure matches the specification exactly. Run `find deep-review/ -type f | sort` and confirm all 12 files exist.
+9. **After building**, verify the directory structure matches the specification exactly. Run `find autopsy/ -type f | sort` and confirm all 12 files exist.

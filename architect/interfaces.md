@@ -15,9 +15,9 @@
 
 | File | Format | Purpose |
 |------|--------|---------|
-| `.deep-review/discovery.md` | Markdown (repo profile template) | Repo stats, module summary, risk areas, architecture diagram |
-| `.deep-review/batch-plan.md` | Markdown (batch plan template) | Batch list with directories, file counts, LOC, focus areas |
-| `.deep-review/file-list.txt` | Plain text (one path per line) | Complete list of files to review |
+| `.autopsy/discovery.md` | Markdown (repo profile template) | Repo stats, module summary, risk areas, architecture diagram |
+| `.autopsy/batch-plan.md` | Markdown (batch plan template) | Batch list with directories, file counts, LOC, focus areas |
+| `.autopsy/file-list.txt` | Plain text (one path per line) | Complete list of files to review |
 
 **Consumed by:** Track 05_orchestrator_command (reads batch plan to launch review agents)
 
@@ -29,11 +29,11 @@
 
 | File | Format | Purpose |
 |------|--------|---------|
-| `.deep-review/batch-{N}/bugs.md` | Markdown (finding format) | Bug-hunter findings for batch N |
-| `.deep-review/batch-{N}/security.md` | Markdown (finding format) | Security-auditor findings for batch N |
-| `.deep-review/batch-{N}/errors.md` | Markdown (finding format) | Error-inspector findings for batch N |
-| `.deep-review/batch-{N}/performance.md` | Markdown (finding format) | Performance-detector findings for batch N |
-| `.deep-review/batch-{N}/stack.md` | Markdown (finding format) | Stack-reviewer findings for batch N |
+| `.autopsy/batch-{N}/bugs.md` | Markdown (finding format) | Bug-hunter findings for batch N |
+| `.autopsy/batch-{N}/security.md` | Markdown (finding format) | Security-auditor findings for batch N |
+| `.autopsy/batch-{N}/errors.md` | Markdown (finding format) | Error-inspector findings for batch N |
+| `.autopsy/batch-{N}/performance.md` | Markdown (finding format) | Performance-detector findings for batch N |
+| `.autopsy/batch-{N}/stack.md` | Markdown (finding format) | Stack-reviewer findings for batch N |
 
 **Consumed by:** Track 04_synthesizer_agent (reads all findings for dedup + synthesis)
 
@@ -83,8 +83,8 @@
 
 | File | Format | Purpose |
 |------|--------|---------|
-| `.deep-review/architecture-analysis.md` | Markdown (structured sections) | Architect agent output: component map, interactions, tooling evaluation, quality attributes, design gaps |
-| `.deep-review/best-practices-research.md` | Markdown (structured sections) | Researcher agent output: per-technology research, pattern research, alternative tools |
+| `.autopsy/architecture-analysis.md` | Markdown (structured sections) | Architect agent output: component map, interactions, tooling evaluation, quality attributes, design gaps |
+| `.autopsy/best-practices-research.md` | Markdown (structured sections) | Researcher agent output: per-technology research, pattern research, alternative tools |
 
 **Consumed by:** Track 08_architecture_agents (architecture-synthesizer reads both)
 

@@ -9,7 +9,7 @@
 ## Interfaces
 
 ### Owns
-- Output Rendering Guide (new reference document: `deep-review/references/output-rendering.md`)
+- Output Rendering Guide (new reference document: `autopsy/references/output-rendering.md`)
 - Terminal output format for all 4 states (Discovery, Review, Synthesis, Complete)
 - Final summary format (replaces current double-line box format in full-review.md)
 - Progress bar format for review agents
@@ -18,8 +18,8 @@
 ### Consumes
 - `commands/full-review.md` (Track 05 -- modifies terminal output sections)
 - `commands/maintain-docs.md` (Track 06 -- modifies summary output section)
-- `.deep-review/state.json` (Track 05 -- reads finding counts for severity line)
-- `.deep-review/progress.md` (Track 05 -- modifies format for dense display)
+- `.autopsy/state.json` (Track 05 -- reads finding counts for severity line)
+- `.autopsy/progress.md` (Track 05 -- modifies format for dense display)
 - Finding format shared schema (interfaces.md -- severity emoji removal in terminal)
 - `REVIEW_REPORT.md` (Track 04 -- critical-only terminal display, full report to file)
 
@@ -35,7 +35,7 @@
 
 ## Overview
 
-Replace all terminal output in the deep-review plugin with a clean, dense CLI dashboard following Claude Code's native design language. The user's terminal shows a compact, professional dashboard — not a chatbot narrating its work. Completed phases collapse to a single line, the active phase shows a braille spinner, severity counts are color-coded text (no emoji), and only critical issues appear inline. Everything else goes to REVIEW_REPORT.md.
+Replace all terminal output in the autopsy plugin with a clean, dense CLI dashboard following Claude Code's native design language. The user's terminal shows a compact, professional dashboard — not a chatbot narrating its work. Completed phases collapse to a single line, the active phase shows a braille spinner, severity counts are color-coded text (no emoji), and only critical issues appear inline. Everything else goes to REVIEW_REPORT.md.
 
 ## Design Decisions (Resolved)
 
@@ -53,7 +53,7 @@ Replace all terminal output in the deep-review plugin with a clean, dense CLI da
 
 ### FR-1: Output Rendering Guide Reference Document
 
-Create `deep-review/references/output-rendering.md` containing the full output specification. Both `full-review.md` and `maintain-docs.md` reference this document to avoid duplicating format rules.
+Create `autopsy/references/output-rendering.md` containing the full output specification. Both `full-review.md` and `maintain-docs.md` reference this document to avoid duplicating format rules.
 
 The guide defines:
 - **Core rules:** No filler text, phase collapsing, symbol set, color palette (named), agent display format
@@ -142,7 +142,7 @@ Add to both `full-review.md` and `maintain-docs.md` a reference instruction at t
 
 ## Acceptance Criteria
 
-1. `deep-review/references/output-rendering.md` exists and contains the full output specification (4 states, symbols, colors, anti-patterns)
+1. `autopsy/references/output-rendering.md` exists and contains the full output specification (4 states, symbols, colors, anti-patterns)
 2. `full-review.md` references the output rendering guide and uses its format for all terminal output
 3. Terminal output during full-review uses ✓ for completed phases, ⠹ for active, ◇ for pending — no emoji
 4. Final summary shows severity counts on one line without emoji, with named color instructions

@@ -1,6 +1,6 @@
 # Output Rendering Guide
 
-You are rendering CLI output for the deep-review plugin. Your output follows Claude Code's native design language. You are a professional tool producing clean, structured terminal output — not a chatbot narrating what you're doing.
+You are rendering CLI output for the autopsy plugin. Your output follows Claude Code's native design language. You are a professional tool producing clean, structured terminal output — not a chatbot narrating what you're doing.
 
 ---
 
@@ -127,7 +127,7 @@ Print the full final summary. This is the most important output — follow every
   ✓ Synthesis · {time}
   ──────────────────────────────────────────────────
 
-  Deep Review Complete — {total time} total
+  Autopsy Complete — {total time} total
 
   {N} critical  ·  {N} high  ·  {N} medium  ·  {N} low     {total} issues
 
@@ -151,7 +151,7 @@ Print the full final summary. This is the most important output — follow every
 
   → REVIEW_REPORT.md         {size} — full findings
   → AGENTS.md (×{N})         module documentation
-  → .deep-review/            raw findings + state
+  → .autopsy/            raw findings + state
 ```
 
 ---
@@ -198,7 +198,7 @@ The maintain-docs command uses the same design language:
 
   ── Next ──────────────────────────────────────────
 
-  1. Run /deep-review:full-review for missing directories
+  1. Run /autopsy:full-review for missing directories
   2. Review updated AGENTS.md files for accuracy
 ```
 
@@ -231,7 +231,7 @@ Never produce these patterns:
 
 | Bad | Good |
 |-----|------|
-| `═══════════════════` / `DEEP REVIEW COMPLETE` / `═══════════════════` | `Deep Review Complete — 19m 00s total` |
+| `═══════════════════` / `DEEP REVIEW COMPLETE` / `═══════════════════` | `Autopsy Complete — 19m 00s total` |
 | `🔴 Critical: 6` / `🟠 High: 17` | `6 critical · 17 high · 18 medium · 6 low` |
 | "The review is complete! Your repository has been thoroughly analyzed by 5 specialized agents..." | *(nothing — the data already said this)* |
 | `Duration: ~19 minutes` / `Discovery: 4m 48s` / `Review: ~5m` | *(already shown in the collapsed ✓ lines)* |

@@ -16,10 +16,10 @@
 - `agents/architect.md` (from Track 08 — agent definition launched by orchestrator)
 - `agents/researcher.md` (from Track 08 — agent definition launched by orchestrator)
 - `agents/architecture-synthesizer.md` (from Track 08 — agent definition launched by orchestrator)
-- `.deep-review/discovery.md` (from Track 02 — repo map passed to architecture agents)
-- `.deep-review/architecture-analysis.md` (from Track 08 — output verified before launching architecture-synthesizer)
-- `.deep-review/best-practices-research.md` (from Track 08 — output verified before launching architecture-synthesizer)
-- `.deep-review/ARCHITECTURE_REPORT.md` or `ARCHITECTURE_REPORT.md` (from Track 08 — verified after architecture-synthesizer completes)
+- `.autopsy/discovery.md` (from Track 02 — repo map passed to architecture agents)
+- `.autopsy/architecture-analysis.md` (from Track 08 — output verified before launching architecture-synthesizer)
+- `.autopsy/best-practices-research.md` (from Track 08 — output verified before launching architecture-synthesizer)
+- `.autopsy/ARCHITECTURE_REPORT.md` or `ARCHITECTURE_REPORT.md` (from Track 08 — verified after architecture-synthesizer completes)
 - `state.json` (from Track 05 — extended with architecture phase tracking)
 - `progress.md` (from Track 05 — extended with architecture status)
 - `references/output-rendering.md` (from Track 07 — governs all terminal output)
@@ -35,7 +35,7 @@
 
 ## What This Track Delivers
 
-Integration of the 3 new architecture assessment agents (architect, researcher, architecture-synthesizer) into the existing full-review orchestrator command. This track adds Phase 2A (architect and researcher running in parallel alongside the existing code review batches), adds the architecture-synthesizer to Phase 3 (running in parallel with the existing code review synthesizer), updates the final summary to show both reports, registers the new agents in plugin.json, and updates README.md documentation. After this track, running `/deep-review:full-review` produces two complementary outputs: REVIEW_REPORT.md (code-level bugs) and ARCHITECTURE_REPORT.md (design-level assessment).
+Integration of the 3 new architecture assessment agents (architect, researcher, architecture-synthesizer) into the existing full-review orchestrator command. This track adds Phase 2A (architect and researcher running in parallel alongside the existing code review batches), adds the architecture-synthesizer to Phase 3 (running in parallel with the existing code review synthesizer), updates the final summary to show both reports, registers the new agents in plugin.json, and updates README.md documentation. After this track, running `/autopsy:full-review` produces two complementary outputs: REVIEW_REPORT.md (code-level bugs) and ARCHITECTURE_REPORT.md (design-level assessment).
 
 ## Scope
 
@@ -101,8 +101,8 @@ These should be resolved with the developer during spec generation:
 ## Test Strategy
 
 - **No automated test framework** -- the plugin is markdown-based with no executable code to unit test
-- **Plugin loading validation:** Run `claude --plugin-dir ./deep-review` and verify all 10 agents are recognized (7 existing + 3 new architecture agents)
-- **Integration test:** Run `/deep-review:full-review` against a sample repository and verify:
+- **Plugin loading validation:** Run `claude --plugin-dir ./autopsy` and verify all 10 agents are recognized (7 existing + 3 new architecture agents)
+- **Integration test:** Run `/autopsy:full-review` against a sample repository and verify:
   - Both REVIEW_REPORT.md and ARCHITECTURE_REPORT.md are generated
   - Architecture agents run during Phase 2A (not blocking code review batches)
   - Architecture-synthesizer runs during Phase 3

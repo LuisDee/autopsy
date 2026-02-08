@@ -1,7 +1,7 @@
 {
-  "name": "deep-review",
+  "name": "autopsy",
   "version": "1.0.0",
-  "description": "Multi-agent code review plugin. Use /deep-review:full-review for exhaustive repository analysis and /deep-review:maintain-docs for documentation maintenance.",
+  "description": "Multi-agent code review plugin. Use /autopsy:full-review for exhaustive repository analysis and /autopsy:maintain-docs for documentation maintenance.",
   "agents": [
     "./agents/discovery.md",
     "./agents/bug-hunter.md",

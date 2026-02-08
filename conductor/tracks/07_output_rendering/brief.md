@@ -9,7 +9,7 @@
 ## Interfaces
 
 ### Owns
-- Output Rendering Guide (new reference document: `deep-review/references/output-rendering.md`)
+- Output Rendering Guide (new reference document: `autopsy/references/output-rendering.md`)
 - Terminal output format for all 4 states (Discovery, Review, Synthesis, Complete)
 - Final summary format (replaces current double-line box format in full-review.md)
 - Progress bar format for review agents
@@ -18,8 +18,8 @@
 ### Consumes
 - `commands/full-review.md` (Track 05 -- modifies terminal output sections)
 - `commands/maintain-docs.md` (Track 06 -- modifies summary output section)
-- `.deep-review/state.json` (Track 05 -- reads finding counts for severity line)
-- `.deep-review/progress.md` (Track 05 -- modifies format for dense display)
+- `.autopsy/state.json` (Track 05 -- reads finding counts for severity line)
+- `.autopsy/progress.md` (Track 05 -- modifies format for dense display)
 - Finding format shared schema (interfaces.md -- severity emoji removal in terminal)
 - `REVIEW_REPORT.md` (Track 04 -- critical-only terminal display, full report to file)
 
@@ -35,12 +35,12 @@
 
 ## What This Track Delivers
 
-A complete replacement of the deep-review plugin's terminal output with a clean, dense CLI dashboard following Claude Code's native design language. Instead of verbose narration with emoji-heavy decorations, the plugin will show collapsed completed phases, an active spinner for in-progress work, progress bars for parallel review agents, color-coded severity counts on a single line, and a concise final summary showing only critical issues. All high/medium/low findings go exclusively to REVIEW_REPORT.md -- the terminal stays focused on what demands immediate attention.
+A complete replacement of the autopsy plugin's terminal output with a clean, dense CLI dashboard following Claude Code's native design language. Instead of verbose narration with emoji-heavy decorations, the plugin will show collapsed completed phases, an active spinner for in-progress work, progress bars for parallel review agents, color-coded severity counts on a single line, and a concise final summary showing only critical issues. All high/medium/low findings go exclusively to REVIEW_REPORT.md -- the terminal stays focused on what demands immediate attention.
 
 ## Scope
 
 ### IN
-- Output Rendering Guide reference document (`deep-review/references/output-rendering.md`) capturing the full specification for all 4 output states
+- Output Rendering Guide reference document (`autopsy/references/output-rendering.md`) capturing the full specification for all 4 output states
 - Orchestrator command (`commands/full-review.md`) terminal output overhaul:
   - Phase collapsing: completed phases collapse to a single summary line
   - Braille dot spinner specification for active phases

@@ -9,15 +9,15 @@
 ## Interfaces
 
 ### Owns
-- `.deep-review/batch-{N}/bugs.md` (bug-hunter findings)
-- `.deep-review/batch-{N}/security.md` (security-auditor findings)
-- `.deep-review/batch-{N}/errors.md` (error-inspector findings)
-- `.deep-review/batch-{N}/performance.md` (performance-detector findings)
-- `.deep-review/batch-{N}/stack.md` (stack-reviewer findings)
+- `.autopsy/batch-{N}/bugs.md` (bug-hunter findings)
+- `.autopsy/batch-{N}/security.md` (security-auditor findings)
+- `.autopsy/batch-{N}/errors.md` (error-inspector findings)
+- `.autopsy/batch-{N}/performance.md` (performance-detector findings)
+- `.autopsy/batch-{N}/stack.md` (stack-reviewer findings)
 
 ### Consumes
 - `{dir}/AGENTS.md` (from Track 02 — read for module context before reviewing)
-- `.deep-review/discovery.md` (from Track 02 — repo profile for stack context)
+- `.autopsy/discovery.md` (from Track 02 — repo profile for stack context)
 
 ## Dependencies
 - Track 01_plugin_scaffold: `agents/` directory must exist
@@ -285,7 +285,7 @@ Each agent's output file must start with:
 
 ## FR-5: Stack Reviewer Agent (`agents/stack-reviewer.md`)
 
-**Dynamic approach:** Read AGENTS.md and `.deep-review/discovery.md` to determine the tech stack, then apply ONLY the relevant checks below.
+**Dynamic approach:** Read AGENTS.md and `.autopsy/discovery.md` to determine the tech stack, then apply ONLY the relevant checks below.
 
 **Python checks:**
 - Type hints present and correct
@@ -375,7 +375,7 @@ Each agent's output file must start with:
 
 ## Acceptance Criteria
 
-- [ ] All 5 agent files exist in `deep-review/agents/` with valid YAML frontmatter
+- [ ] All 5 agent files exist in `autopsy/agents/` with valid YAML frontmatter
 - [ ] Each agent has the shared output format documented
 - [ ] Each agent has the complete checklist from the build plan (not abbreviated)
 - [ ] Each agent has 2-3 generic few-shot examples

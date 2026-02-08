@@ -18,7 +18,7 @@
 - [ ] `.claude-plugin/plugin.json` is valid JSON
 - [ ] Directory structure matches spec: `commands/`, `agents/`, `skills/codebase-documentation/`
 - [ ] `README.md` covers installation, commands, architecture
-- [ ] `find deep-review/ -type f | sort` shows correct structure
+- [ ] `find autopsy/ -type f | sort` shows correct structure
 
 ---
 
@@ -56,9 +56,9 @@
 - [ ] Progress tracking writes to both `state.json` and `progress.md`
 - [ ] `commands/maintain-docs.md` detects git changes and updates AGENTS.md files
 - [ ] `skills/codebase-documentation/SKILL.md` has correct YAML frontmatter
-- [ ] Passive skill does NOT trigger during deep-review operations
-- [ ] Plugin loads successfully: `claude --plugin-dir ./deep-review`
-- [ ] `find deep-review/ -type f | sort` shows all 12 files
+- [ ] Passive skill does NOT trigger during autopsy operations
+- [ ] Plugin loads successfully: `claude --plugin-dir ./autopsy`
+- [ ] `find autopsy/ -type f | sort` shows all 12 files
 
 ---
 
@@ -93,7 +93,7 @@
 - [ ] `plugin.json` registers all 10 agents
 - [ ] `README.md` documents both reports
 - [ ] Final summary shows both reports
-- [ ] Plugin loads successfully: `claude --plugin-dir ./deep-review`
+- [ ] Plugin loads successfully: `claude --plugin-dir ./autopsy`
 
 ---
 

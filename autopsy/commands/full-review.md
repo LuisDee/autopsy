@@ -2,7 +2,7 @@
 description: "Orchestrates a multi-agent, exhaustive code review of the entire repository across three phases: Discovery, Review, and Synthesis."
 ---
 
-# Deep Review: Full Review
+# Autopsy: Full Review
 
 You are the orchestrator for a deep, multi-agent code review and architecture assessment. You coordinate three phases:
 1. **Discovery** — Map the repo, generate documentation, create a batch plan
@@ -12,7 +12,7 @@ You are the orchestrator for a deep, multi-agent code review and architecture as
 **CRITICAL RULES:**
 - You NEVER read source code files directly — only batch plans, progress files, and output existence checks
 - All heavy work happens in sub-agents with fresh context windows
-- Disk (`.deep-review/` directory) is the coordination layer between phases
+- Disk (`.autopsy/` directory) is the coordination layer between phases
 - Write state to disk before every batch — this makes the review resumable after compaction
 - Follow the output rendering guide at `references/output-rendering.md` for ALL terminal output formatting. Use the exact symbols, colors, and patterns defined there. Never use banned patterns.
 
@@ -23,13 +23,13 @@ You are the orchestrator for a deep, multi-agent code review and architecture as
 ### Step 1: Initialize
 
 ```bash
-mkdir -p .deep-review
+mkdir -p .autopsy
 ```
 
-Add `.deep-review/` to `.gitignore` if not already present:
+Add `.autopsy/` to `.gitignore` if not already present:
 
 ```bash
-grep -q '.deep-review/' .gitignore 2>/dev/null || echo '.deep-review/' >> .gitignore
+grep -q '.autopsy/' .gitignore 2>/dev/null || echo '.autopsy/' >> .gitignore
 ```
 
 ### Step 2: Record start time
@@ -54,7 +54,7 @@ Write initial state:
 }
 ```
 
-Write this to `.deep-review/state.json`.
+Write this to `.autopsy/state.json`.
 
 ### Step 3: Set effort level
 
@@ -84,8 +84,8 @@ Launch the discovery agent using the **Task tool** in FOREGROUND (blocking):
 > 1. Map the repository (file inventory, stats, metadata)
 > 2. Understand every module (read files, analyze each directory)
 > 3. Generate AGENTS.md files (with companion CLAUDE.md) for directories with 3+ code files
-> 4. Write the discovery profile to `.deep-review/discovery.md`
-> 5. Generate the batch plan to `.deep-review/batch-plan.md`
+> 4. Write the discovery profile to `.autopsy/discovery.md`
+> 5. Generate the batch plan to `.autopsy/batch-plan.md`
 >
 > Run your self-review checklist before completing.
 
@@ -97,13 +97,13 @@ Launch the discovery agent using the **Task tool** in FOREGROUND (blocking):
 
 After the discovery agent completes:
 
-1. Check if `.deep-review/discovery.md` exists — if NOT, print "Discovery failed: discovery.md not found. Cannot proceed." and abort.
-2. Check if `.deep-review/batch-plan.md` exists — if NOT, print "Discovery failed: batch-plan.md not found. Cannot proceed." and abort.
-3. Read `.deep-review/batch-plan.md` to determine:
+1. Check if `.autopsy/discovery.md` exists — if NOT, print "Discovery failed: discovery.md not found. Cannot proceed." and abort.
+2. Check if `.autopsy/batch-plan.md` exists — if NOT, print "Discovery failed: batch-plan.md not found. Cannot proceed." and abort.
+3. Read `.autopsy/batch-plan.md` to determine:
    - Total number of batches
    - Files per batch
    - Total files to review
-4. Read `.deep-review/discovery.md` for repo stats (total files, modules, AGENTS.md count)
+4. Read `.autopsy/discovery.md` for repo stats (total files, modules, AGENTS.md count)
 
 Update `state.json`:
 - `"phase": "review"`
@@ -120,7 +120,7 @@ Print (collapsed Discovery line — green ✓):
 If this is a git repository, capture recent intentional changes:
 
 ```bash
-git log --oneline -10 2>/dev/null > .deep-review/recent-changes.txt || echo "Not a git repo" > .deep-review/recent-changes.txt
+git log --oneline -10 2>/dev/null > .autopsy/recent-changes.txt || echo "Not a git repo" > .autopsy/recent-changes.txt
 ```
 
 This file will be passed to review agents so they don't flag intentional recent changes as bugs.
@@ -136,7 +136,7 @@ The architect and researcher agents will launch alongside the first review batch
 **Prompt for the architect agent:**
 > You are the architect agent for a deep architecture assessment. Your job is to analyze the system's architecture: components, interactions, tooling choices, quality attributes, and design gaps.
 >
-> First read `.deep-review/discovery.md` for the full repository map and module inventory.
+> First read `.autopsy/discovery.md` for the full repository map and module inventory.
 >
 > Then follow the instructions in your agent definition file (`agents/architect.md`) exactly. Complete all 6 steps:
 > 1. Infer the System Goal
@@ -146,14 +146,14 @@ The architect and researcher agents will launch alongside the first review batch
 > 5. Quality Attribute Tradeoff Analysis
 > 6. Identify Design Gaps
 >
-> Write your output to `.deep-review/architecture-analysis.md`.
+> Write your output to `.autopsy/architecture-analysis.md`.
 >
 > Run your self-review checklist before completing.
 
 **Prompt for the researcher agent:**
 > You are the researcher agent for a deep architecture assessment. Your job is to research official documentation, best practices, and recommended patterns for every major technology in the stack.
 >
-> First read `.deep-review/discovery.md` to identify the technologies and architectural patterns in use.
+> First read `.autopsy/discovery.md` to identify the technologies and architectural patterns in use.
 >
 > Then follow the instructions in your agent definition file (`agents/researcher.md`) exactly. Complete all 5 steps:
 > 1. Identify Research Targets
@@ -162,7 +162,7 @@ The architect and researcher agents will launch alongside the first review batch
 > 4. Research Alternative Tools
 > 5. Research Interaction Patterns
 >
-> Write your output to `.deep-review/best-practices-research.md`.
+> Write your output to `.autopsy/best-practices-research.md`.
 >
 > Run your self-review checklist before completing.
 
@@ -187,7 +187,7 @@ For each batch:
 #### 6a. Create batch directory
 
 ```bash
-mkdir -p .deep-review/batch-{N}
+mkdir -p .autopsy/batch-{N}
 ```
 
 #### 6b. Write state before launching agents
@@ -196,7 +196,7 @@ Update `state.json`:
 - `"current_batch": {N}`
 - Save all current progress
 
-Write `.deep-review/progress.md` (v2 dense format):
+Write `.autopsy/progress.md` (v2 dense format):
 ```
 <!-- progress v2 -->
 phase: review
@@ -231,9 +231,9 @@ For each of the 5 review agents (bug-hunter, security-auditor, error-inspector, 
 > 1. Read the AGENTS.md file in each assigned directory FIRST for module context
 > 2. Read the FULL contents of EVERY file in your assigned directories — no skimming
 > 3. Check every item in your agent checklist (from your agent definition)
-> 4. Write your findings to `.deep-review/batch-{N}/{agent-output-file}.md`
+> 4. Write your findings to `.autopsy/batch-{N}/{agent-output-file}.md`
 >
-> **Output file:** `.deep-review/batch-{N}/{output-name}.md`
+> **Output file:** `.autopsy/batch-{N}/{output-name}.md`
 >
 > **Finding format (STRICT):**
 > ```
@@ -265,7 +265,7 @@ For each of the 5 review agents (bug-hunter, security-auditor, error-inspector, 
 > - Re-read 100+ line files with zero findings
 > - Report undocumented gotchas as "Documentation Gap" findings
 > - Focus on YOUR domain expertise. If an issue clearly belongs to another agent's domain (e.g., security for bug-hunter), note it briefly as a one-liner but don't write a full finding
-> - Read `.deep-review/recent-changes.txt` for context on recent intentional changes. Do not flag recently committed changes as missing features unless there's an actual bug.
+> - Read `.autopsy/recent-changes.txt` for context on recent intentional changes. Do not flag recently committed changes as missing features unless there's an actual bug.
 >
 > Start your output with a header:
 > ```
@@ -291,7 +291,7 @@ For each of the 5 review agents (bug-hunter, security-auditor, error-inspector, 
 After all foreground agents return, verify their output files exist:
 
 ```bash
-ls .deep-review/batch-{N}/bugs.md .deep-review/batch-{N}/security.md .deep-review/batch-{N}/errors.md .deep-review/batch-{N}/performance.md .deep-review/batch-{N}/stack.md 2>/dev/null | wc -l
+ls .autopsy/batch-{N}/bugs.md .autopsy/batch-{N}/security.md .autopsy/batch-{N}/errors.md .autopsy/batch-{N}/performance.md .autopsy/batch-{N}/stack.md 2>/dev/null | wc -l
 ```
 
 For any missing file, the agent failed to write its output. Log to `state.json` under `"agent_failures"` and to `progress.md`. Optionally retry ONCE with a refined prompt (add: "Previous attempt failed. Ensure you write output to the specified file path using the Write tool.")
@@ -303,7 +303,7 @@ For any missing file, the agent failed to write its output. Log to `state.json` 
 After the first batch completes, also verify the architecture agent outputs:
 
 ```bash
-ls .deep-review/architecture-analysis.md .deep-review/best-practices-research.md 2>/dev/null | wc -l
+ls .autopsy/architecture-analysis.md .autopsy/best-practices-research.md 2>/dev/null | wc -l
 ```
 
 - If both files exist: update `state.json` with `"phase_2a_status": "complete"`, `"architecture_analysis_exists": true`, `"best_practices_research_exists": true`.
@@ -319,8 +319,8 @@ Print architecture status after first batch:
 For each completed output file, count findings by severity:
 
 ```bash
-grep -c '🔴 CRITICAL' .deep-review/batch-{N}/bugs.md 2>/dev/null || echo 0
-grep -c '🟠 HIGH' .deep-review/batch-{N}/bugs.md 2>/dev/null || echo 0
+grep -c '🔴 CRITICAL' .autopsy/batch-{N}/bugs.md 2>/dev/null || echo 0
+grep -c '🟠 HIGH' .autopsy/batch-{N}/bugs.md 2>/dev/null || echo 0
 # ... for each file and severity
 ```
 
@@ -386,7 +386,7 @@ Launch BOTH synthesizers as separate foreground Task calls in a **single respons
 > You are the synthesizer for a deep code review. Your job is to read all findings, deduplicate them, spot-check top issues, perform cross-cutting analysis, and produce the final report.
 >
 > Follow the instructions in your agent definition file (`agents/synthesizer.md`) exactly. Complete all 5 steps:
-> 1. Read ALL findings from ALL `.deep-review/batch-*/` directories
+> 1. Read ALL findings from ALL `.autopsy/batch-*/` directories
 > 2. Apply three-level deduplication (exact match, semantic overlap, systemic patterns)
 > 3. Spot-check top 10 Critical/High findings by re-reading actual code
 > 4. Perform all 4 cross-cutting analyses (architecture, dependencies, testing gaps, secrets)
@@ -403,7 +403,7 @@ Launch BOTH synthesizers as separate foreground Task calls in a **single respons
 > You are the architecture-synthesizer for a deep architecture assessment. Your job is to cross-reference all architecture analysis inputs and produce the final ARCHITECTURE_REPORT.md.
 >
 > Follow the instructions in your agent definition file (`agents/architecture-synthesizer.md`) exactly. Complete all 4 steps:
-> 1. Read all inputs from `.deep-review/` (architecture-analysis.md, best-practices-research.md, discovery.md, batch-*/*.md for code evidence)
+> 1. Read all inputs from `.autopsy/` (architecture-analysis.md, best-practices-research.md, discovery.md, batch-*/*.md for code evidence)
 > 2. Cross-reference design gaps vs research, tooling vs research, code findings as evidence
 > 3. Generate design recommendations with priority, effort, impact, and evidence
 > 4. Write ARCHITECTURE_REPORT.md to the repo root
@@ -427,8 +427,8 @@ After both synthesizers complete:
 2. If missing, retry code review synthesizer once
 3. If `REVIEW_REPORT.md` still does not exist after retry, create a minimal fallback report:
    - List total files reviewed (from discovery.md)
-   - List paths to raw findings: `ls .deep-review/batch-*/*.md`
-   - Note: "Synthesis failed. Raw findings are available in the .deep-review/ directory."
+   - List paths to raw findings: `ls .autopsy/batch-*/*.md`
+   - Note: "Synthesis failed. Raw findings are available in the .autopsy/ directory."
    - This preserves the review work instead of losing it entirely.
 4. Read the statistics section of REVIEW_REPORT.md for final counts
 
@@ -446,7 +446,7 @@ After both synthesizers complete:
    - best-practices-research.md: {exists/missing}
 
    ## Raw Data
-   Available inputs are in `.deep-review/`. Run a full review again to regenerate.
+   Available inputs are in `.autopsy/`. Run a full review again to regenerate.
    ```
 4. Update `state.json`: `"phase_3a_status": "complete"` or `"phase_3a_status": "failed"`, `"architecture_report_exists": true/false`
 
@@ -477,7 +477,7 @@ Print (State 4 — Complete):
   ✓ Synthesis · {time}
   ──────────────────────────────────────────────────
 
-  Deep Review Complete — {total time} total
+  Autopsy Complete — {total time} total
 
   {N} critical  ·  {N} high  ·  {N} medium  ·  {N} low     {total} issues
 ```
@@ -519,7 +519,7 @@ If architecture succeeded:
   1. Fix critical issues first
   2. Read REVIEW_REPORT.md for code-level details
   3. Read ARCHITECTURE_REPORT.md for design-level assessment
-  4. Run /deep-review:maintain-docs after changes
+  4. Run /autopsy:maintain-docs after changes
 ```
 
 If architecture failed:
@@ -529,7 +529,7 @@ If architecture failed:
   1. Fix critical issues first
   2. Read REVIEW_REPORT.md for code-level details
   3. Re-run full review to regenerate architecture assessment
-  4. Run /deep-review:maintain-docs after changes
+  4. Run /autopsy:maintain-docs after changes
 ```
 
 Then print reports section:
@@ -541,7 +541,7 @@ If architecture succeeded:
   → REVIEW_REPORT.md         code review findings
   → ARCHITECTURE_REPORT.md   design assessment
   → AGENTS.md (×{N})         module documentation
-  → .deep-review/            raw findings + state
+  → .autopsy/            raw findings + state
 ```
 
 If architecture failed (omit ARCHITECTURE_REPORT.md line):
@@ -550,7 +550,7 @@ If architecture failed (omit ARCHITECTURE_REPORT.md line):
 
   → REVIEW_REPORT.md         code review findings
   → AGENTS.md (×{N})         module documentation
-  → .deep-review/            raw findings + state
+  → .autopsy/            raw findings + state
 ```
 
 Do NOT follow the summary with any prose paragraph.
@@ -561,14 +561,14 @@ Do NOT follow the summary with any prose paragraph.
 
 If context compaction occurs at any point during the review:
 
-1. **Read state:** `cat .deep-review/state.json`
-2. **Read progress:** `cat .deep-review/progress.md`
+1. **Read state:** `cat .autopsy/state.json`
+2. **Read progress:** `cat .autopsy/progress.md`
 3. **Parse progress.md (dual-format support):**
    - If first line contains `<!-- progress v2 -->`: parse as key-value pairs (phase, batch, completed, severity counts, failures, arch)
    - Otherwise: parse as v1 Markdown format (heading-based sections with emoji severity markers)
-4. **Read batch plan:** `cat .deep-review/batch-plan.md`
+4. **Read batch plan:** `cat .autopsy/batch-plan.md`
 5. **Recover architecture state:**
-   - If `phase_2a_status` is "running": check for `.deep-review/architecture-analysis.md` and `.deep-review/best-practices-research.md`. If both exist, set `phase_2a_status` to "complete". If missing, set to "failed". **Architecture recovery never blocks code review recovery.**
+   - If `phase_2a_status` is "running": check for `.autopsy/architecture-analysis.md` and `.autopsy/best-practices-research.md`. If both exist, set `phase_2a_status` to "complete". If missing, set to "failed". **Architecture recovery never blocks code review recovery.**
    - If `phase_3a_status` is "running": check for `ARCHITECTURE_REPORT.md`. If exists, set to "complete". If missing and Phase 2 code review is complete, retry architecture-synthesizer once. If still missing, set to "failed".
 6. **Resume from where you left off:**
    - If `phase` is "discovery": Discovery agent is running or failed — check for output files and proceed to Phase 2 if they exist
@@ -587,7 +587,7 @@ If context compaction occurs at any point during the review:
 | Discovery agent fails | Abort review — cannot proceed without batch plan |
 | Review agent output missing | Log failure, retry once, continue if still missing |
 | All 5 agents fail for a batch | Log as failed batch, continue to next batch |
-| Synthesizer fails | Retry once. If still fails, point user to raw findings in `.deep-review/batch-*/` |
+| Synthesizer fails | Retry once. If still fails, point user to raw findings in `.autopsy/batch-*/` |
 | REVIEW_REPORT.md missing | Retry synthesizer. If still missing, create a minimal report listing raw finding file paths |
 | Architect agent output missing | Log failure, retry once. If still missing, mark phase_2a as failed, continue code review |
 | Researcher agent output missing | Log failure, retry once. If still missing, mark phase_2a as failed, continue code review |

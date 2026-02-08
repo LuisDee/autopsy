@@ -25,7 +25,7 @@
 
 ## Acceptance Criteria
 - [ ] `commands/full-review.md` has valid YAML frontmatter
-- [ ] Setup phase creates .deep-review/, updates .gitignore, writes state.json
+- [ ] Setup phase creates .autopsy/, updates .gitignore, writes state.json
 - [ ] Phase 1 launches discovery agent and reads batch plan
 - [ ] Phase 2 launches 5 agents in parallel per batch with full instructions
 - [ ] Batch sizing strategy matches repo size table

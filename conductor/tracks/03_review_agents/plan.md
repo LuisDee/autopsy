@@ -4,21 +4,21 @@
 
 ### Tasks
 
-- [x] **1.1** Write `deep-review/agents/bug-hunter.md` — complete agent definition with YAML frontmatter, 15-item checklist, 3 few-shot examples, mandatory rules, self-review step
-- [x] **1.2** Write `deep-review/agents/security-auditor.md` — complete agent definition with YAML frontmatter, 6-category checklist (injection, auth, data exposure, input handling, secrets, dependencies), 3 few-shot examples, Exploitability field for criticals
+- [x] **1.1** Write `autopsy/agents/bug-hunter.md` — complete agent definition with YAML frontmatter, 15-item checklist, 3 few-shot examples, mandatory rules, self-review step
+- [x] **1.2** Write `autopsy/agents/security-auditor.md` — complete agent definition with YAML frontmatter, 6-category checklist (injection, auth, data exposure, input handling, secrets, dependencies), 3 few-shot examples, Exploitability field for criticals
 
 ## Phase 2: Error Inspector & Performance Detector
 
 ### Tasks
 
-- [x] **2.1** Write `deep-review/agents/error-inspector.md` — complete agent definition with YAML frontmatter, 5-category checklist (missing, broken, resilience, cleanup, logging), 3 few-shot examples
-- [x] **2.2** Write `deep-review/agents/performance-detector.md` — complete agent definition with YAML frontmatter, 6-category checklist (database, memory, CPU/IO, concurrency, resources, network), performance-specific severity override, 3 few-shot examples
+- [x] **2.1** Write `autopsy/agents/error-inspector.md` — complete agent definition with YAML frontmatter, 5-category checklist (missing, broken, resilience, cleanup, logging), 3 few-shot examples
+- [x] **2.2** Write `autopsy/agents/performance-detector.md` — complete agent definition with YAML frontmatter, 6-category checklist (database, memory, CPU/IO, concurrency, resources, network), performance-specific severity override, 3 few-shot examples
 
 ## Phase 3: Stack Reviewer
 
 ### Tasks
 
-- [x] **3.1** Write `deep-review/agents/stack-reviewer.md` — complete agent definition with YAML frontmatter, dynamic stack detection logic, all 10 stack sections (Python, Airflow, BigQuery/SQL, FastAPI/Flask, Docker/K8s, JS/TS, React, Go, Rust, Catch-All), 3 few-shot examples
+- [x] **3.1** Write `autopsy/agents/stack-reviewer.md` — complete agent definition with YAML frontmatter, dynamic stack detection logic, all 10 stack sections (Python, Airflow, BigQuery/SQL, FastAPI/Flask, Docker/K8s, JS/TS, React, Go, Rust, Catch-All), 3 few-shot examples
 
 ## Phase 4: Validation
 

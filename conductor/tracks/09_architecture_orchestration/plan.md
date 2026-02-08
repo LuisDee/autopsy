@@ -7,9 +7,9 @@
 ## Phase 1: Plugin Registration and Documentation
 
 ### [x] Task 1.1: Update plugin.json
-- Add 3 new agent entries to the `agents` array in `deep-review/.claude-plugin/plugin.json`
+- Add 3 new agent entries to the `agents` array in `autopsy/.claude-plugin/plugin.json`
 - Append: `./agents/architect.md`, `./agents/researcher.md`, `./agents/architecture-synthesizer.md`
-- Validate: `python3 -c "import json; d=json.load(open('deep-review/.claude-plugin/plugin.json')); assert len(d['agents']) == 10"`
+- Validate: `python3 -c "import json; d=json.load(open('autopsy/.claude-plugin/plugin.json')); assert len(d['agents']) == 10"`
 
 ### [x] Task 1.2: Update README.md
 - Update "What It Does" to mention both REVIEW_REPORT.md and ARCHITECTURE_REPORT.md
@@ -31,8 +31,8 @@
 - Add Step 5b: "Launch architecture agents alongside first batch"
   - Write `phase_2a_status: "running"` to state.json before launching
   - Modify Step 6c for the FIRST batch only: launch 7 agents (5 review + architect + researcher) in a single message
-  - Add architect agent prompt (read discovery.md, follow agent definition, write to `.deep-review/architecture-analysis.md`)
-  - Add researcher agent prompt (read discovery.md, follow agent definition, write to `.deep-review/best-practices-research.md`)
+  - Add architect agent prompt (read discovery.md, follow agent definition, write to `.autopsy/architecture-analysis.md`)
+  - Add researcher agent prompt (read discovery.md, follow agent definition, write to `.autopsy/best-practices-research.md`)
 - Add Step 6d-arch: Verify architecture output files after first batch completes
   - If missing, log to agent_failures, retry once
   - Update `phase_2a_status` to "complete" or "failed"
@@ -58,7 +58,7 @@
 
 ### [x] Task 3.1: Modify Phase 3 synthesis
 - Update Step 8: launch BOTH synthesizers (code review + architecture) in a single message as 2 parallel foreground Task calls
-- Add architecture-synthesizer prompt: follow agent definition, read all inputs from `.deep-review/`, write `ARCHITECTURE_REPORT.md` to repo root
+- Add architecture-synthesizer prompt: follow agent definition, read all inputs from `.autopsy/`, write `ARCHITECTURE_REPORT.md` to repo root
 - If `phase_2a_status` is "failed", prepend missing-input handling instruction to architecture-synthesizer prompt
 - Update Step 9: verify both `REVIEW_REPORT.md` and `ARCHITECTURE_REPORT.md` exist
 - Add fallback for missing ARCHITECTURE_REPORT.md (minimal report noting failure + listing available partial data)
@@ -93,8 +93,8 @@
 ## Phase 4: AGENTS.md Updates and Validation
 
 ### [x] Task 4.1: Update AGENTS.md files
-- Update `deep-review/AGENTS.md`: agent count 7→10, add architecture phases to data flow, mention ARCHITECTURE_REPORT.md
-- Update `deep-review/commands/AGENTS.md`: update full-review.md description (4 phases), update data flow
+- Update `autopsy/AGENTS.md`: agent count 7→10, add architecture phases to data flow, mention ARCHITECTURE_REPORT.md
+- Update `autopsy/commands/AGENTS.md`: update full-review.md description (4 phases), update data flow
 
 ### [x] Task 4.2: Cross-validation
 - Verify full-review.md references all 3 architecture agent names correctly
@@ -104,8 +104,8 @@
 - Verify all existing Phase 1/2/3 logic is preserved (no regressions)
 
 ### [x] Task 4.3: Plugin loading validation
-- Run `claude --plugin-dir ./deep-review` and verify no errors
-- Validate plugin.json: `python3 -c "import json; d=json.load(open('deep-review/.claude-plugin/plugin.json')); assert len(d['agents']) == 10; print('OK:', d['agents'])"`
+- Run `claude --plugin-dir ./autopsy` and verify no errors
+- Validate plugin.json: `python3 -c "import json; d=json.load(open('autopsy/.claude-plugin/plugin.json')); assert len(d['agents']) == 10; print('OK:', d['agents'])"`
 - Verify full-review.md is under a reasonable size (will grow from 449 lines but should stay manageable)
 
 ### [x] Task 4.4: Final commit and track completion

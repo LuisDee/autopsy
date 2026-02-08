@@ -4,7 +4,7 @@
 
 ### Tasks
 
-- [x] **1.1** Write `deep-review/agents/synthesizer.md` with YAML frontmatter and all 5 steps
+- [x] **1.1** Write `autopsy/agents/synthesizer.md` with YAML frontmatter and all 5 steps
 - [x] **1.2** Three-level dedup algorithm with confidence elevation
 - [x] **1.3** Spot-check step for top 10 Critical/High findings
 - [x] **1.4** All 4 cross-cutting analyses with commands

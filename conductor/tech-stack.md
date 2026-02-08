@@ -15,15 +15,15 @@
 ## Agent Architecture
 - **Orchestration pattern:** Orchestrator-Worker with sequential pipeline (Phase 1 → Phase 2 fan-out → Phase 3)
 - **Sub-agent execution:** Task tool with `run_in_background: true`
-- **Result retrieval:** File-based coordination via `.deep-review/` directory (NOT TaskOutput)
+- **Result retrieval:** File-based coordination via `.autopsy/` directory (NOT TaskOutput)
 - **Max parallelism:** 5 agents per batch
 - **Target per-agent context:** 30-40K tokens of code per invocation
 
 ## Coordination Layer
-- **Working directory:** `.deep-review/` in the target repo root
-- **Progress tracking:** `.deep-review/progress.md` (human-readable) + `.deep-review/state.json` (machine-readable)
-- **Agent outputs:** `.deep-review/batch-{N}/{agent-name}.md`
-- **Discovery output:** `.deep-review/discovery.md` + `.deep-review/batch-plan.md`
+- **Working directory:** `.autopsy/` in the target repo root
+- **Progress tracking:** `.autopsy/progress.md` (human-readable) + `.autopsy/state.json` (machine-readable)
+- **Agent outputs:** `.autopsy/batch-{N}/{agent-name}.md`
+- **Discovery output:** `.autopsy/discovery.md` + `.autopsy/batch-plan.md`
 - **Final report:** `REVIEW_REPORT.md` in repo root
 
 ## Output Files
@@ -32,7 +32,7 @@
 | `AGENTS.md` | Cross-LLM documentation (primary) | Permanent — committed to repo |
 | `CLAUDE.md` | Claude Code companion (`@AGENTS.md` reference) | Permanent — committed to repo |
 | `REVIEW_REPORT.md` | Final severity-graded review report | Permanent — committed to repo |
-| `.deep-review/*` | Working files, batch outputs, progress | Temporary — added to `.gitignore` |
+| `.autopsy/*` | Working files, batch outputs, progress | Temporary — added to `.gitignore` |
 
 ## Sub-Agent Definitions
 | Agent | Role | Phase |

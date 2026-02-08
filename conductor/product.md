@@ -1,9 +1,9 @@
 # Initial Concept
 
-A Claude Code plugin called `deep-review` that provides a single slash command `/deep-review:full-review` which autonomously performs an exhaustive, multi-agent code review of an entire repository and generates living documentation (CLAUDE.md files) throughout the codebase.
+A Claude Code plugin called `autopsy` that provides a single slash command `/autopsy:full-review` which autonomously performs an exhaustive, multi-agent code review of an entire repository and generates living documentation (CLAUDE.md files) throughout the codebase.
 
 It also provides:
-- `/deep-review:maintain-docs` — a command to keep documentation current after code changes
+- `/autopsy:maintain-docs` — a command to keep documentation current after code changes
 - A passive skill (`codebase-documentation`) that auto-triggers during normal work to remind Claude to read/update CLAUDE.md files
 - 7 specialized agents that the commands orchestrate
 
@@ -27,17 +27,17 @@ Solo developers who want the rigor of a multi-person code review without the ove
 4. **Actionable output** — Every finding includes exact file path, line number, severity, description, impact, and a specific fix recommendation
 
 ## Key Features
-- `/deep-review:full-review` — 3-phase autonomous review: discovery, parallel multi-agent review, synthesis
-- `/deep-review:maintain-docs` — Incremental documentation updates after code changes
+- `/autopsy:full-review` — 3-phase autonomous review: discovery, parallel multi-agent review, synthesis
+- `/autopsy:maintain-docs` — Incremental documentation updates after code changes
 - Passive `codebase-documentation` skill — Reminds Claude to read/update CLAUDE.md during normal development
 - 7 specialized agents: discovery, bug-hunter, security-auditor, error-inspector, performance-detector, stack-reviewer, synthesizer
-- Disk-based coordination (`.deep-review/` directory) keeps orchestrator context light
+- Disk-based coordination (`.autopsy/` directory) keeps orchestrator context light
 - Automatic batch sizing based on repo size (small to huge repos supported)
 - Context pressure management with compaction-safe progress tracking
 
 ## Success Criteria
 - Plugin installs and loads cleanly via `claude plugin install`
-- `/deep-review:full-review` completes autonomously on repos of varying sizes
+- `/autopsy:full-review` completes autonomously on repos of varying sizes
 - `REVIEW_REPORT.md` contains deduplicated, severity-graded findings with exact file paths and line numbers
 - CLAUDE.md files contain specific, useful documentation (not generic boilerplate)
 - Future Claude Code sessions are measurably faster due to CLAUDE.md context

@@ -7,7 +7,7 @@
 ## Phase 1: Architect Agent
 
 ### [x] Task 1.1: Create architect agent definition
-- Create `deep-review/agents/architect.md` with:
+- Create `autopsy/agents/architect.md` with:
   - YAML frontmatter (name: architect, tools: Read/Grep/Glob)
   - Role introduction (ATAM-inspired, NOT a code reviewer)
   - Step 1: Infer the System Goal (what, who, value, context)
@@ -23,12 +23,12 @@
 - Output format: must match the mandatory section headers defined in spec.md
 
 ### [x] Task 1.2: Validate architect agent
-- Verify YAML frontmatter parses correctly: `python3 -c "import yaml; yaml.safe_load(open('deep-review/agents/architect.md').read().split('---')[1])"`
+- Verify YAML frontmatter parses correctly: `python3 -c "import yaml; yaml.safe_load(open('autopsy/agents/architect.md').read().split('---')[1])"`
 - Verify agent includes all 6 analysis steps
 - Verify self-review checklist is present with all items
 - Verify 2-3 few-shot examples are included
 - Verify agent is under 400 lines
-- Verify plugin loads: `claude --plugin-dir ./deep-review` (check for errors)
+- Verify plugin loads: `claude --plugin-dir ./autopsy` (check for errors)
 
 ### [x] Task 1.3: Commit architect agent dc43920
 - Commit message: `feat(agents): Add architect agent for ATAM-inspired architecture analysis`
@@ -38,7 +38,7 @@
 ## Phase 2: Researcher Agent
 
 ### [x] Task 2.1: Create researcher agent definition
-- Create `deep-review/agents/researcher.md` with:
+- Create `autopsy/agents/researcher.md` with:
   - YAML frontmatter (name: researcher, tools: Read/Grep/Glob/WebSearch/WebFetch)
   - Role introduction (evidence-based research, cite real documentation)
   - Step 1: Identify Research Targets (technologies + architectural pattern)
@@ -67,7 +67,7 @@
 ## Phase 3: Architecture Synthesizer Agent
 
 ### [x] Task 3.1: Create architecture-synthesizer agent definition
-- Create `deep-review/agents/architecture-synthesizer.md` with:
+- Create `autopsy/agents/architecture-synthesizer.md` with:
   - YAML frontmatter (name: architecture-synthesizer, tools: Read/Grep/Glob/Bash)
   - Role introduction (cross-references, produces ARCHITECTURE_REPORT.md)
   - Step 1: Read All Inputs (architecture-analysis.md, best-practices-research.md, discovery.md, batch-{N}/*.md)
@@ -105,15 +105,15 @@
 - Verify total agent count would be 10 (7 existing + 3 new) when plugin.json is updated in Track 09
 
 ### [x] Task 4.2: Plugin loading validation
-- Run `claude --plugin-dir ./deep-review` and verify no errors from the 3 new agent files
-- Verify `python3 -c "import json; json.load(open('deep-review/.claude-plugin/plugin.json'))"` passes (existing agents still valid)
+- Run `claude --plugin-dir ./autopsy` and verify no errors from the 3 new agent files
+- Verify `python3 -c "import json; json.load(open('autopsy/.claude-plugin/plugin.json'))"` passes (existing agents still valid)
 
 ### [x] Task 4.3: Final commit and phase completion
 - Commit any validation fixes
 - Commit message: `conductor(checkpoint): Complete Track 08 Architecture Agents`
 
 ### Phase Completion Verification
-- Verify all 3 agent files exist in `deep-review/agents/`
+- Verify all 3 agent files exist in `autopsy/agents/`
 - Verify each has valid YAML frontmatter, self-review checklist, few-shot examples
 - Verify output format specifications align between producer and consumer agents
 - Manual verification: review each agent definition for completeness against spec acceptance criteria

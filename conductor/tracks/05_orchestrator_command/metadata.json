@@ -8,7 +8,7 @@
   "cc_version_current": "v1",
 
   "dependencies": ["02_discovery_agent", "03_review_agents", "04_synthesizer_agent"],
-  "interfaces_owned": ["state.json", "progress.md", "deep-review-directory", "final-summary"],
+  "interfaces_owned": ["state.json", "progress.md", "autopsy-directory", "final-summary"],
   "interfaces_consumed": ["batch-plan.md", "discovery.md", "batch-findings-format", "REVIEW_REPORT.md"],
 
   "events_published": [],

@@ -9,9 +9,9 @@
 ## Interfaces
 
 ### Owns
-- `.deep-review/discovery.md` (repo profile)
-- `.deep-review/batch-plan.md` (batch list for review phase)
-- `.deep-review/file-list.txt` (complete file inventory)
+- `.autopsy/discovery.md` (repo profile)
+- `.autopsy/batch-plan.md` (batch list for review phase)
+- `.autopsy/file-list.txt` (complete file inventory)
 - `{dir}/AGENTS.md` files (module documentation)
 - `{dir}/CLAUDE.md` companion files
 
@@ -34,8 +34,8 @@ The discovery agent definition (`agents/discovery.md`) — the Phase 1 agent tha
 ### IN
 - `agents/discovery.md` agent definition with YAML frontmatter
 - Step-by-step instructions for: repo mapping (file inventory, tech stack detection, LOC counts), module understanding (reading representative files per directory), AGENTS.md generation (using the quality bar from product guidelines), batch plan generation (grouping related modules, sizing batches, ordering by risk)
-- Discovery profile template (`.deep-review/discovery.md`)
-- Batch plan template (`.deep-review/batch-plan.md`)
+- Discovery profile template (`.autopsy/discovery.md`)
+- Batch plan template (`.autopsy/batch-plan.md`)
 - AGENTS.md template for module documentation
 - Root AGENTS.md template
 
@@ -66,7 +66,7 @@ These should be resolved with the developer during spec generation:
 - This agent creates the AGENTS.md files that ALL review agents read first for module context — quality here cascades to review quality
 - The batch plan format is an interface contract consumed by the orchestrator — changes here require updating the orchestrator
 - Agent should generate companion `CLAUDE.md` files containing `@AGENTS.md` at every level
-- The agent must exclude `.deep-review/`, `node_modules`, `.git`, and other common non-code directories from scanning
+- The agent must exclude `.autopsy/`, `node_modules`, `.git`, and other common non-code directories from scanning
 
 ## Complexity: M
 ## Estimated Phases: ~3

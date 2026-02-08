@@ -8,16 +8,16 @@
 ## Interfaces
 
 ### Owns
-- `.deep-review/` working directory structure
-- `.deep-review/state.json` (machine-readable progress)
-- `.deep-review/progress.md` (human-readable progress)
-- `.gitignore` update (add `.deep-review/`)
+- `.autopsy/` working directory structure
+- `.autopsy/state.json` (machine-readable progress)
+- `.autopsy/progress.md` (human-readable progress)
+- `.gitignore` update (add `.autopsy/`)
 - Final terminal summary output
 
 ### Consumes
-- `.deep-review/batch-plan.md` (from discovery agent via Track 02)
-- `.deep-review/discovery.md` (from discovery agent via Track 02)
-- `.deep-review/batch-{N}/*.md` (from review agents via Track 03 — existence check only)
+- `.autopsy/batch-plan.md` (from discovery agent via Track 02)
+- `.autopsy/discovery.md` (from discovery agent via Track 02)
+- `.autopsy/batch-{N}/*.md` (from review agents via Track 03 — existence check only)
 - `REVIEW_REPORT.md` (from synthesizer via Track 04 — existence check only)
 
 ## Dependencies
@@ -31,13 +31,13 @@
 
 ## What This Track Delivers
 
-The main orchestrator command (`commands/full-review.md`) — the most complex and critical file in the plugin. When the user runs `/deep-review:full-review`, this command coordinates the entire 3-phase review: launches the discovery agent, reads the batch plan, launches 5 review agents in parallel per batch, tracks progress, handles context pressure, launches the synthesizer, and prints a final summary. The orchestrator never reads source code directly — it stays light by delegating all heavy work to sub-agents and using disk for coordination.
+The main orchestrator command (`commands/full-review.md`) — the most complex and critical file in the plugin. When the user runs `/autopsy:full-review`, this command coordinates the entire 3-phase review: launches the discovery agent, reads the batch plan, launches 5 review agents in parallel per batch, tracks progress, handles context pressure, launches the synthesizer, and prints a final summary. The orchestrator never reads source code directly — it stays light by delegating all heavy work to sub-agents and using disk for coordination.
 
 ## Scope
 
 ### IN
 - `commands/full-review.md` command definition
-- Setup phase: create `.deep-review/`, update `.gitignore`, note start time, run `/effort max`
+- Setup phase: create `.autopsy/`, update `.gitignore`, note start time, run `/effort max`
 - Phase 1 orchestration: launch discovery agent (foreground), wait, read batch plan, print Phase 1 summary
 - Phase 2 orchestration: for each batch — create batch directory, launch 5 agents in parallel (background), poll for output files, update progress, print batch summary
 - Phase 3 orchestration: launch synthesizer (foreground), wait, confirm REVIEW_REPORT.md exists, print Phase 3 summary

@@ -6,7 +6,7 @@
 ## Interfaces
 
 ### Owns
-- Plugin directory structure (`deep-review/` with `commands/`, `agents/`, `skills/`, `.claude-plugin/`)
+- Plugin directory structure (`autopsy/` with `commands/`, `agents/`, `skills/`, `.claude-plugin/`)
 - `plugin.json` manifest
 - `README.md` documentation
 
@@ -22,7 +22,7 @@
 
 ## What This Track Delivers
 
-The foundational directory structure, plugin manifest (`plugin.json`), and README for the deep-review Claude Code plugin. This is the skeleton that all subsequent tracks populate with agent definitions, commands, and skills. It also establishes the plugin's public documentation and installation instructions.
+The foundational directory structure, plugin manifest (`plugin.json`), and README for the autopsy Claude Code plugin. This is the skeleton that all subsequent tracks populate with agent definitions, commands, and skills. It also establishes the plugin's public documentation and installation instructions.
 
 ## Scope
 
@@ -41,8 +41,8 @@ The foundational directory structure, plugin manifest (`plugin.json`), and READM
 
 These should be resolved with the developer during spec generation:
 
-1. **Plugin name in manifest:** `deep-review` vs `repo-reviewer` vs something else?
-   Trade-off: `deep-review` matches the build plan; `repo-reviewer` matches the repo directory name
+1. **Plugin name in manifest:** `autopsy` vs `repo-reviewer` vs something else?
+   Trade-off: `autopsy` matches the build plan; `repo-reviewer` matches the repo directory name
 2. **README detail level:** Comprehensive README with cost tables and architecture diagrams vs minimal README with just installation + usage?
    Trade-off: Comprehensive helps adoption but takes more time; minimal ships faster
 3. **Placeholder strategy:** Empty placeholder files in `agents/` and `commands/` vs just empty directories?
@@ -53,7 +53,7 @@ These should be resolved with the developer during spec generation:
 - The `plugin.json` only requires the `name` field — everything else is optional but recommended for discoverability
 - Custom paths in the manifest SUPPLEMENT default directories, they don't replace them
 - `${CLAUDE_PLUGIN_ROOT}` resolves to the absolute plugin path at runtime — useful if any scripts are added later
-- The plugin will be tested via `claude --plugin-dir ./deep-review` during development
+- The plugin will be tested via `claude --plugin-dir ./autopsy` during development
 - README should document `MAX_THINKING_TOKENS=63999` and `/effort max` as recommended launch configuration
 
 ## Complexity: S

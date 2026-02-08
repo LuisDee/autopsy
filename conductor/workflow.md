@@ -158,32 +158,32 @@ Before marking any task complete, verify:
 
 ```bash
 # Clone the plugin repository
-git clone <repo-url> deep-review
+git clone <repo-url> autopsy
 # Test plugin loading
-claude --plugin-dir ./deep-review
+claude --plugin-dir ./autopsy
 ```
 
 ### Daily Development
 
 ```bash
 # Test plugin loads correctly
-claude --plugin-dir ./deep-review
+claude --plugin-dir ./autopsy
 
 # Verify plugin structure
-find deep-review/ -type f | sort
+find autopsy/ -type f | sort
 
 # Test a specific command
-# Run /deep-review:full-review in a test repo
+# Run /autopsy:full-review in a test repo
 ```
 
 ### Before Committing
 
 ```bash
 # Verify all 12 plugin files exist
-find deep-review/ -type f | sort
+find autopsy/ -type f | sort
 
 # Verify plugin.json is valid JSON
-python3 -c "import json; json.load(open('deep-review/.claude-plugin/plugin.json'))"
+python3 -c "import json; json.load(open('autopsy/.claude-plugin/plugin.json'))"
 ```
 
 ## Testing Requirements

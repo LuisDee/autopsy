@@ -1,4 +1,5 @@
 ---
+name: full-review
 description: "Orchestrates a multi-agent, exhaustive code review of the entire repository across three phases: Discovery, Review, and Synthesis."
 ---
 

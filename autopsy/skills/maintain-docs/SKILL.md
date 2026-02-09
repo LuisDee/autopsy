@@ -1,4 +1,5 @@
 ---
+name: maintain-docs
 description: "Detects git changes and incrementally updates AGENTS.md files to keep documentation in sync with the codebase."
 ---
 

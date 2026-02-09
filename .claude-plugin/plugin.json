@@ -1,0 +1,22 @@
+{
+  "name": "autopsy",
+  "version": "1.0.0",
+  "description": "Multi-agent code review plugin. Use /autopsy:full-review for exhaustive repository analysis and /autopsy:maintain-docs for documentation maintenance.",
+  "agents": [
+    "./autopsy/agents/discovery.md",
+    "./autopsy/agents/bug-hunter.md",
+    "./autopsy/agents/security-auditor.md",
+    "./autopsy/agents/error-inspector.md",
+    "./autopsy/agents/performance-detector.md",
+    "./autopsy/agents/stack-reviewer.md",
+    "./autopsy/agents/synthesizer.md",
+    "./autopsy/agents/architect.md",
+    "./autopsy/agents/researcher.md",
+    "./autopsy/agents/architecture-synthesizer.md"
+  ],
+  "skills": [
+    "./autopsy/skills/full-review",
+    "./autopsy/skills/maintain-docs",
+    "./autopsy/skills/codebase-documentation"
+  ]
+}

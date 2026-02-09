@@ -15,8 +15,6 @@
     "./agents/architecture-synthesizer.md"
   ],
   "skills": [
-    "./skills/full-review",
-    "./skills/maintain-docs",
     "./skills/codebase-documentation"
   ]
 }

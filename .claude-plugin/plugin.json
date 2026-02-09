@@ -15,8 +15,6 @@
     "./autopsy/agents/architecture-synthesizer.md"
   ],
   "skills": [
-    "./autopsy/skills/full-review",
-    "./autopsy/skills/maintain-docs",
     "./autopsy/skills/codebase-documentation"
   ]
 }

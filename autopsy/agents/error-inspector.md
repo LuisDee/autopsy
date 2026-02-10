@@ -3,6 +3,7 @@ name: error-inspector
 description: "Audits error handling paths, missing try/catch blocks, swallowed exceptions, and incomplete error propagation."
 tools:
   - Read
+  - Write
   - Grep
   - Glob
 ---

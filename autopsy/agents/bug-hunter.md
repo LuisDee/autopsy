@@ -3,6 +3,7 @@ name: bug-hunter
 description: "Finds logic errors, bugs, and correctness issues in assigned files."
 tools:
   - Read
+  - Write
   - Grep
   - Glob
 ---

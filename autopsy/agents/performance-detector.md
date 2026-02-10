@@ -3,6 +3,7 @@ name: performance-detector
 description: "Detects performance bottlenecks, N+1 queries, unnecessary allocations, and scalability concerns."
 tools:
   - Read
+  - Write
   - Grep
   - Glob
 ---

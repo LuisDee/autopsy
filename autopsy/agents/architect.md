@@ -3,6 +3,7 @@ name: architect
 description: "Evaluates system architecture: components, interactions, tooling choices, quality attributes, and design gaps. Inspired by ATAM (Architecture Tradeoff Analysis Method)."
 tools:
   - Read
+  - Write
   - Grep
   - Glob
 ---

@@ -3,6 +3,7 @@ name: stack-reviewer
 description: "Reviews stack-specific best practices, framework misuse, dependency issues, and idiomatic patterns."
 tools:
   - Read
+  - Write
   - Grep
   - Glob
 ---

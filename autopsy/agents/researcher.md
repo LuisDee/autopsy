@@ -3,6 +3,7 @@ name: researcher
 description: "Researches official documentation, best practices, and recommended patterns for every major technology in the stack. Provides evidence-based backing for architecture assessment."
 tools:
   - Read
+  - Write
   - Grep
   - Glob
   - WebSearch

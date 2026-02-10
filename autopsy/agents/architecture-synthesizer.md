@@ -3,6 +3,8 @@ name: architecture-synthesizer
 description: "Phase 3 agent: cross-references architecture analysis with best-practice research and code review findings to produce the final ARCHITECTURE_REPORT.md."
 tools:
   - Read
+  - Write
+  - Edit
   - Grep
   - Glob
   - Bash

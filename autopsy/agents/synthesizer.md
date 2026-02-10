@@ -3,6 +3,8 @@ name: synthesizer
 description: "Phase 3 agent: deduplicates findings, spot-checks top issues, performs cross-cutting analysis, updates root AGENTS.md, and produces the final REVIEW_REPORT.md."
 tools:
   - Read
+  - Write
+  - Edit
   - Grep
   - Glob
   - Bash

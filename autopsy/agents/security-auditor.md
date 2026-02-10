@@ -3,6 +3,7 @@ name: security-auditor
 description: "Identifies security vulnerabilities, unsafe patterns, and OWASP Top 10 risks in assigned files."
 tools:
   - Read
+  - Write
   - Grep
   - Glob
 ---
